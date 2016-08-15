@@ -1,0 +1,496 @@
+Go入門
+Treasure2016版
+00:00 15 Aug 2016
+Tags: golang
+
+Kenta SUZUKI
+Software Engineer at VOYAGE GROUP
+@suzu_v
+https://github.com/suzuken
+
+* この資料について
+
+VOYAGE GROUPの学生エンジニア向けインターンシップTreasureの2016年度版講義資料です。Goの講義は2日間です。
+
+.link https://voyagegroup.com/internship/treasure/
+
+GitHubで公開されています。
+
+.link https://github.com/voyagegroup/talks
+
+* アウトライン
+
+- なぜGoなのか？
+- 事前課題解説
+- testing
+- net/http
+- encoding/json
+- テンプレート
+- Goとデータベース
+- データベースマイグレーション
+
+.image https://golang.org/doc/gopher/project.png
+
+* なぜGoを使うのか？
+
+いろいろな良い点があります。
+
+- 言語仕様がfixしている
+- 軽快なbuild / 高速な動作 / concurrencyサポート
+- ツール (go tool, gofmt ...)
+- ほどよい標準ライブラリ
+
+Goの一番の特徴はSimplicityだと思います。
+
+.link https://talks.golang.org/2015/simplicity-is-complicated.slide#1 Simplicity is Complicated
+
+* 準備: Tour of Go
+
+.link https://tour.golang.org
+
+- まずTour of Goおすすめ
+- 言語仕様が簡単に学べる
+- ほどよい演習
+
+演習やってないひとはやりましょう
+
+.link https://gist.github.com/suzuken/d892c42e56c986bca813
+
+* 手続き、コマンドラインツール、そしてテスト
+
+* 事前課題その1
+
+n番目のフィボナッチ数を返す手続きを実装してください。
+
+    f(0) = 0
+    f(1) = 1
+    f(n+2) = f(n) + f(n+1)
+
+.link https://gist.github.com/suzuken/a8ec8fc95cd0c0d18d8d5584fdd4f3ab
+
+* 事前課題その1 フィボナッチ数 解答
+
+    func fib(n int) int {
+        if n == 0 {
+            return 0
+        }
+        if n == 1 {
+            return 1
+        }
+        return fib(n-1) + fib(n-2)
+    }
+
+ちょっと冗長？
+
+OK、リファクタリングしましょう。テスト書いてから。
+
+* テスト
+
+テスト大事
+
+.image https://connpass-tokyo.s3.amazonaws.com/event/27540/41d84cf0e6494e2e91e51ad8e9c85310.png
+
+.link https://golang.org/pkg/testing/
+
+* フィボナッチのテスト （発展課題 その1）
+
+.code fib/fib_test.go /func TestFib/,/^}/
+
+.link https://github.com/golang/go/wiki/TableDrivenTests
+
+    $ go test -v ./...
+    === RUN   TestFib
+    --- PASS: TestFib (0.00s)
+    PASS
+    ok      github.com/voyagegroup/talks/2016/treasure-go/fib       0.006s
+
+
+* リファクタリング
+
+.code fib/fib.go /func fib/,/^}/
+
+書き換えたらテストをします。
+
+    $ go test -v ./...
+    === RUN   TestFib
+    --- PASS: TestFib (0.00s)
+    PASS
+    ok      github.com/voyagegroup/talks/2016/treasure-go/fib       0.006s
+
+リファクタリング前にはテストを書きましょう。
+
+* コマンドラインツールをつくろう（発展課題 その2）
+
+Goで `go run` させられるのは `main` パッケージのみ。
+
+.play basic/basic.go
+
+`fib` をするコマンドラインツールをつくってみましょう。
+
+* os.Args をつかう
+
+.play fib/fib.go /func main/,/^}/
+
+ほとんどの場合は `flag` をつかったほうが楽です。
+
+.link https://golang.org/pkg/flag/
+
+* よくしたレビューコメント
+
+可読性大事。可読性のあるコードは信頼できるコードです。
+
+- `gofmt` おねがいします
+- `main` 以外で `os.Exit` や `panic` するのは大抵好ましくないです
+- `error` はよっぽど自明じゃないかぎり無視しないように
+- 変数や手続き名は `snake_case` ではなくて `camelCase`
+- 変数名は短く
+- 余分なelse: インデントを最小にしましょう
+
+.link https://golang.org/s/style
+.link https://blog.golang.org/go-fmt-your-code
+
+* TDD実習 & ペアプログラミング
+
+* TDD実習の説明
+
+- これからのとなりの人と一緒にプログラムを書いてもらいます
+- どちらか1台のPCをつかいます
+- どちらか一方がテストを、どちらか一方が実装側を書きます
+
+デモします。
+
+* TDD実習 その1: スタック 30分
+
+- スタックを作成してください
+
+.image https://upload.wikimedia.org/wikipedia/commons/b/b4/Lifo_stack.png _ 350
+
+    // 簡単のため、intしかいれられないようにしています
+    type Stack struct{}
+    func (s *Stack) Pop() string   {}
+    func (s *Stack) Push(s string) {}
+
+内部のデータ構造はsliceをつかうといいでしょう。
+
+.link https://blog.golang.org/go-slices-usage-and-internals
+
+* 動作例
+
+    s := &Stack{}
+    s.Push("dataA")
+    s.Push("dataB")
+    s.Push("dataC")
+    s.Pop() // -> "dataC"
+    s.Pop() // -> "dataB"
+    s.Push("dataD")
+    s.Pop() // -> "dataD"
+    s.Pop() // -> "dataA"
+    s.Pop() // -> ""
+
+* TDD実習 その2: 制限付きスタック 10分
+
+- スタックに最大長を設定できるようにしてください
+- 最大長を超えるPushについては、古いものから削除されるようにしましょう。
+
+    s.Stack := &Stack{limit: 2}
+    s.Push("dataA")
+    s.Push("dataB")
+    s.Push("dataC")
+    s.Pop() // -> "dataC"
+    s.Pop() // -> "dataB"
+    s.Pop() // -> ""
+
+
+インタフェースについては自分たちで相談して決めてみましょう。
+
+* testing振り返り
+
+- どんなテストをかけばいいかを考えるのは最初は難しいかもしれません。
+- `testing` パッケージではふつうのGoコードでテストを書くことができます。テストを書くのに特別な知識は必要ありません。
+- ユニットテストを書くことで既存の機能が正常に動いていることを担保しつつ、新しい機能の追加を手助けしてくれます
+- デバッグプリントするのではなくテストを書く、ということも視野にいれてみましょう
+
+* net/http 入門
+
+* 事前課題その2: net/http 演習
+
+- 指定したURLにあるコンテンツについて、タイトルとdescriptionを抜き出すツールを書きましょう
+- HTTPサーバとして実装してこの機能をつかえるようにしましょう
+
+.link https://gist.github.com/suzuken/b456e0f4679f86da572839d6d86f159e
+
+    $ go run scraper/scraper.go&
+    $ curl -D - "http://localhost:8080?url=https://golang.org"
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+    Date: Fri, 05 Aug 2016 07:45:23 GMT
+    Content-Length: 57
+
+    {"title":"The Go Programming Language","description":""}
+
+* net/http.(*Server)
+
+Goの標準ライブラリでは簡単にHTTPサーバがたてられます。
+
+    func main() {
+    	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+    		// wはio.Writerなので書き込むことができます
+    		fmt.Fprint(w, "hello world")
+    	})
+    	http.ListenAndServe(":8080", nil)
+    }
+
+and
+
+    $ go run server.go&
+    $ curl http://localhost:8080
+    hello world
+
+.link https://golang.org/pkg/fmt/#Fprint
+.link https://golang.org/pkg/net/http/
+
+* encoding/json
+
+.code scraper/scraper.go /type Page/,/^}/
+
+and
+
+    enc := json.NewEncoder(w)
+    if err := enc.Encode(p); err != nil {
+        // ...
+    }
+
+すると io.Writer である `w` にJSONが出力されます。
+
+.link https://golang.org/pkg/encoding/json/
+
+
+* 2の解答例
+
+.code scraper/scraper.go /START OMIT/,/END OMIT/
+
+.link https://gist.github.com/suzuken/e211f01171e2a841ddf6417e479004e0
+
+* 2の解答例 (cont.)
+
+.code scraper/scraper.go /func handler/,/^}/
+
+.link https://gist.github.com/suzuken/e211f01171e2a841ddf6417e479004e0
+
+* io.Writer またはインタフェース
+
+    type Writer interface {
+        Write(p []byte) (n int, err error)
+    }
+
+.link https://golang.org/pkg/io/#Writer
+
+`io.Writer` を出力先としてサポートすると、Goの標準的なインタフェースを利用した機能に出力する機能を提供することができます。例えば `os.Stdout` なども `io.Writer` を実装しています。
+
+.link http://mattn.kaoriya.net/software/lang/go/20140501172821.htm Big Sky :: Golang のオフィシャルが提供するインタフェースまとめ
+.link http://spf13.com/presentation/7-biggest-mistakes-in-go/ 7 Common mistakes in Go and when to avoid them
+
+`net/http` の `HandlerFunc` の引数でも `io.Writer` を実はつかっていました。
+
+.link https://golang.org/pkg/net/http/#HandlerFunc
+
+* 実習 net/http: 複数のページ取得 45分
+
+事前課題その2でつくったHTTPサーバに以下の機能を追加しましょう。
+
+- URLを複数受け取り、複数ページのtitleとdescriptionを取ってこれるようにしましょう。パラメータの渡し方はお好みで。（カンマ区切りなど）
+- 結果はJSONの配列で返すようにしましょう。その際、どのURLからどの結果が取得できたかをわかるようにしてください。
+
+発展課題
+
+- 各ページへのHTTPリクエストのタイムアウトを設定し、長く時間のかかったURLは無視できるようにしましょう。正常に取得できた結果のみ返すようにします。
+- URLごとにページの取得を並列化しましょう。すべてのページの結果が揃ったら結果を返すようにしてみましょう。
+- `net/http/httptest` をつかってこの機能のテストを書いてみましょう。
+
+* 小さなWebアプリケーションを実装しよう
+
+* ところで
+
+Webアプリケーションってなんでしょう？
+
+- HTTPリクエスト受け付ければWebアプリケーション？
+- フォームがあるもの？
+- たくさんページがあればWebアプリ？
+- ユーザが使えばWebアプリ？
+- 入出力によってページ内容がかわればWebアプリ？
+- TwitterやGoogleはWebアプリ？
+
+Webアプリとひとえにいってもいろいろありますね。
+
+* WAF: Web Application Framework
+
+- Webアプリケーションをつくるために便利な機能をまとめたもの
+- Goにおいては `net/http` のラッパーであるものが多い
+- 今回は `gin-gonic/gin` をとりあげます
+
+.link https://github.com/gin-gonic/gin
+
+`net/http` と標準ライブラリを組み合わせてできないことはGoではできないと思って良いので、楽に書くためにWAFを使う、くらいなスタンスがいいと思います。
+
+* 実アプリケーションの例
+
+.link https://github.com/suzuken/wiki
+
+デモしつつ解説します。MySQLがあれば手元でも動かせるので、やってみてください。
+
+機能は以下のもののみです。
+
+- ユーザ登録とログイン・ログアウト
+- 記事の投稿・編集・削除
+
+* テンプレート
+
+* WebアプリケーションにおけるHTMLテンプレート
+
+- 構造化してviewをつくる
+- 適切にエスケープをしてHTMLを出力する
+
+スマートフォンアプリだったりクライアントサイドでテンプレートの機能をもっているものをつかうと、この仕事はサーバサイドではやらないことになります。
+
+.link http://www.slideshare.net/ockeghem/xssreintroduction
+
+* text/template html/template
+
+.play template/template.go /func main/,/^}/
+
+* 実習: コメント欄の追加
+
+- 記事にコメント欄をつけてみましょう
+
+テンプレートを追加して、フォーム作って、送信、あたりを作る必要があります。エンドポイントも新しくつくりましょう。ただ、ちゃんとコメントが保存されなくてもいいです。（DB実習をしてから、ちゃんとやりましょう）
+
+発展課題
+
+- コメント内容をメモリ上に保存できるようにしてみましょう。適当な `map[int][]string` なんかにいれるといいかも？誰のコメントかとりあえず気にしなくてもいいです。
+- 誰のコメントかも保存できるようにしてみましょう。`type Comment struct` をつくって上の `map` の値としていれられるといいかもしれません。
+
+* 実習: CSRF対策
+
+wikiのフォームにトークンが入っていることに気が付きましたか？
+
+    <input type="hidden" name="_csrf" value="{{.csrf}}">
+
+.link https://www.ipa.go.jp/security/awareness/vendor/programmingv2/contents/301.html IPA CSRF対策
+
+実習: CSRFトークンをブラウザの開発ツールで上書きして、リクエストが失敗することを確認してみましょう。
+
+* Goとデータベース
+
+* Goとデータベース: database/sql
+
+.link https://golang.org/pkg/database/sql/
+.link https://golang.org/s/sqlwiki
+.link https://golang.org/s/sqldrivers
+
+MySQLだと
+
+.link https://github.com/go-sql-driver/mysql/wiki/Examples
+
+SQLite3だと
+
+.link https://github.com/mattn/go-sqlite3/blob/master/_example/simple/simple.go
+
+（だいたい）同じように使える。ざっと使い方を掴みたいなら以下もおすすめです。
+
+.link http://go-database-sql.org/
+
+* クエリするときの原則
+
+- クエリにパラメータを埋め込むときは必ずプリペアドステートメントを使いましょう。
+
+.link https://www.ipa.go.jp/files/000024396.pdf SQLインジェクション対策について
+.link http://www.ipa.go.jp/files/000017320.pdf 安全なSQLの呼び出し方
+.link http://d.hatena.ne.jp/ajiyoshi/20100409/1270809525
+
+Prepare, Query、どちらでもプリペアドステートメントが使えます。
+
+.link https://golang.org/pkg/database/sql/#DB.Prepare
+.link https://golang.org/pkg/database/sql/#DB.Query
+
+* DB実習
+
+MySQLに自分用の日報を保存するコマンドラインアプリケーションをつくりましょう。
+
+- 日報用のテーブル `reports` を用意し、保存できるようにしてください。更新、削除の機能はお好みで。
+- テーブルは自分で考えてみましょう。
+- いい感じに日報を整形して標準出力できるようなオプションがあると便利でしょう。
+
+発展課題
+
+- 日報にコメントを追加できるようにしてみましょう。
+- 複数人数でも日報が共有できる設計でつくってみましょう。
+- Webアプリにしてみましょう。
+- Markdownでもかけるようにしてみましょう。
+
+* データベースマイグレーション
+
+- 複数人でアプリケーションをつくるときにスキーマの管理どうしますか？
+- データベースマイグレーションをつかうと便利です
+
+.link https://github.com/rubenv/sql-migrate
+
+* DB実習
+
+wikiの記事につけたコメントをちゃんとDBに保存できるようにしてみましょう。
+
+テーブル例
+
+    CREATE TABLE `comments` (
+      `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+      `body` TEXT NOT NULL,
+      `created` timestamp NOT NULL DEFAULT NOW(),
+      `updated` timestamp NOT NULL DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (`comment_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='list of comments';
+
+- データベースマイグレーションも用意してあるので、つかってみるといいでしょう
+
+発展課題
+
+- コメントについて誰がコメントしたかも保存できるようにしましょう
+- コメントの編集削除をサポートしましょう
+- トップページに記事のコメント数も出すようにしましょう
+
+* Tips: クエリ結果のstructへのbind
+
+reflectをつかってstructにbindする方法があります。
+
+.link https://github.com/jmoiron/sqlx
+.link https://github.com/naoina/genmai
+
+`voyagegroup/gin-boilerplate` では `sqlx` をつかっています。
+
+またはコード生成をつかうのも良い選択でしょう。 `database/sql` のための `Scan` 用手続きをstructから生成すると便利です。 `suzuken/wiki` では `scaneo` をつかっています。
+
+.link https://blog.golang.org/generate
+.link https://github.com/variadico/scaneo
+
+* サンプルアプリケーションの説明 その2
+
+wikiよりもうちょっとモダンな作り方になっているのがこちら。
+
+.link https://github.com/voyagegroup/gin-boilerplate
+
+コードベースは `gin-gonic` なので `suzuken/wiki` にも似ていますが、以下を変えています。スマホアプリなんかを作る場合にもこっちの設計によってくるかと。
+
+- JSONでのAPIでクライアントとやりとり
+- RestfulっぽいAPI設計
+
+コードをみつつ説明します。
+
+* HTTPサーバを書くときに考えることはたくさんある
+
+- どのようなHTTPリクエストを受け取るか
+- どのようなルーティングにすべきか
+- HTTPレスポンスステータスは何にすべきか
+- HTTPレスポンスヘッダには何を入れるべきか
+- HTTPレスポンスボディにはどのような形式で返すべきか
+
+より詳しくは [[https://twitter.com/brtriver][@brtriver]] の講義でやります
+
+
