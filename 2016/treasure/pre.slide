@@ -1,0 +1,40 @@
+Treasure初日オリエン
+Treasure2016版
+00:00 14 Aug 2016
+
+Kenta SUZUKI
+Software Engineer at VOYAGE GROUP
+@suzu_v
+https://github.com/suzuken
+
+* Treasureへようこそ！
+
+* みなさんにおすすめなこと
+
+- メモは大量にとりましょう。日報はそのための下書きだと思うといいです。作業ログや学んだことは文章に書いておきましょう。
+- 僕たちからどんどん盗めるものは盗んでいってください。コードの書き方、どんどん真似してください。まずは手を動かしてやってみましょう。
+- 妥協せずにやりましょう。あなたが納得するまでTreasureの時間をまんべんなくつかってみてください。僕たちも本気で取り組んでいます。
+
+* 講義概要
+
+- アイデアソン: サービスをつくれる頭にブレイクしてもらいます by みっきー先生
+- Go: 2日間みっちりやる予定です。ごりごりコーディングしてもらいます。(ΦωΦ)ﾌﾌﾌ…
+- HTTP: Webアプリケーションを書くための基礎を学んでもらいます。
+- DB: 三浦さんのスペシャルコースです。
+- インフラ / DevOps: アプリケーションエンジニアにも知ってもらいたい基礎をお届けします。僕らが普段どう開発しているかも感じられるはずです。
+- チーム: 後半に向けて大事なことをkatzchangから。
+
+* 明日のGo講義までの事前準備
+
+ローカルのMySQL環境を整えておいてください。Dockerおすすめ。
+
+.link https://github.com/VG-Tech-Dojo/treasure2016-pre/tree/master/docs/env
+
+それと任意のGo製アプリが動く環境を作っておいてください。Go事前課題その2が動いていれば問題ないはず。
+
+.link https://github.com/VG-Tech-Dojo/treasure2016-pre/tree/master/docs/go
+
+以下のアプリを動かせるようにしておいてください。
+
+.link https://github.com/voyagegroup/gin-boilerplate
+.link https://github.com/suzuken/wiki
