@@ -18,6 +18,14 @@ GitHubで公開されています。
 
 .link https://github.com/voyagegroup/talks
 
+* 2日間で学んでほしいこと
+
+- Goで小さなコマンドラインツールを書けるようになること
+- 一通り小さなWebアプリケーションを書けるようになること
+- Goのコードの書き方に慣れること
+
+とにかくどんどんコードを書きましょう。
+
 * アウトライン
 
 - なぜGoなのか？
@@ -55,6 +63,22 @@ Goの一番の特徴はSimplicityだと思います。
 演習やってないひとはやりましょう
 
 .link https://gist.github.com/suzuken/d892c42e56c986bca813
+
+* 準備: How to write Go code
+
+.link https://golang.org/doc/code.html
+
+- `$GOPATH/bin` をPATHに追加しましょう
+- これから書いてもらうコードもGoのワークスペースに則って配置して貰う必要があります。
+- 例えば `$GOPATH/src/github.com/suzuken/wiki` などに配置します。go getをつかうとこのルールに従って配置されます。
+
+tips: ghqをつかうとgit cloneするリポジトリの配置が楽になります。
+
+.link https://github.com/motemen/ghq
+
+tips: pecoをつかうと配置しているコードへの移動が楽になります。
+
+.link https://github.com/peco/peco
 
 * 手続き、コマンドラインツール、そしてテスト
 
@@ -165,7 +189,7 @@ Goで `go run` させられるのは `main` パッケージのみ。
 
 .image https://upload.wikimedia.org/wikipedia/commons/b/b4/Lifo_stack.png _ 350
 
-    // 簡単のため、intしかいれられないようにしています
+    // 簡単のため、stringしかいれられないようにしています
     type Stack struct{}
     func (s *Stack) Pop() string   {}
     func (s *Stack) Push(s string) {}
@@ -191,6 +215,8 @@ Goで `go run` させられるのは `main` パッケージのみ。
 
 - スタックに最大長を設定できるようにしてください
 - 最大長を超えるPushについては、古いものから削除されるようにしましょう。
+
+動作例
 
     s.Stack := &Stack{limit: 2}
     s.Push("dataA")
@@ -228,9 +254,11 @@ Goで `go run` させられるのは `main` パッケージのみ。
 
     {"title":"The Go Programming Language","description":""}
 
+この課題の狙いは、ある仕事をHTTPサーバに組み込むことを試してもらうことです。適切に仕事をわけて実装すれば、楽に組み込むことができます。
+
 * net/http.(*Server)
 
-Goの標準ライブラリでは簡単にHTTPサーバがたてられます。
+Goの標準ライブラリでは簡単にHTTPサーバを立ち上げることができます。
 
     func main() {
     	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -290,10 +318,6 @@ and
 .link http://mattn.kaoriya.net/software/lang/go/20140501172821.htm Big Sky :: Golang のオフィシャルが提供するインタフェースまとめ
 .link http://spf13.com/presentation/7-biggest-mistakes-in-go/ 7 Common mistakes in Go and when to avoid them
 
-`net/http` の `HandlerFunc` の引数でも `io.Writer` を実はつかっていました。
-
-.link https://golang.org/pkg/net/http/#HandlerFunc
-
 * 実習 net/http: 複数のページ取得 45分
 
 事前課題その2でつくったHTTPサーバに以下の機能を追加しましょう。
@@ -337,11 +361,35 @@ Webアプリとひとえにいってもいろいろありますね。
 .link https://github.com/suzuken/wiki
 
 デモしつつ解説します。MySQLがあれば手元でも動かせるので、やってみてください。
-
 機能は以下のもののみです。
 
 - ユーザ登録とログイン・ログアウト
 - 記事の投稿・編集・削除
+
+このあとの実習でこのアプリケーションに機能を追加してもらいます。
+
+* よくあるWebアプリケーションの構成
+
+今回はいわゆるMVCの構成にしてみました。といっても `gin-gonic/gin` がこのルールで動くわけではなくて、Goのpackageの機能をつかってディレクトリをわけているだけです。
+
+コードをみつつ、1つ1つ中身を解説します。
+
+.image https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/MVC-Process.svg/1000px-MVC-Process.svg.png 300 _
+
+* なぜこういう構成なの？
+
+Webアプリケーションによくある仕事をわけると、下の3つの層に分けることができます。
+
+- データソースからの参照、あるいは更新をする層
+- ユーザへの見せ方をいい感じに整える層
+- HTTPリクエストをうけて、仕事を制御して振り分ける層
+
+.link http://www.slideshare.net/brtriver/php-14295877 フラットなPHPからフレームワークへ
+
+仕事をわけることで、各実装をシンプルにすることができます。ただし分割しすぎるのはよくありません。またGo特有ですが、適切にpackageを分割することによるメリットもあります。
+
+- 構造体やインタフェースの名前をシンプルにできる。
+- 依存関係が明瞭になり、package単位のテストを書きやすくなる。
 
 * テンプレート
 
@@ -354,7 +402,7 @@ Webアプリとひとえにいってもいろいろありますね。
 
 .link http://www.slideshare.net/ockeghem/xssreintroduction
 
-* text/template html/template
+* html/template の利用例
 
 .play template/template.go /func main/,/^}/
 
@@ -362,7 +410,7 @@ Webアプリとひとえにいってもいろいろありますね。
 
 - 記事にコメント欄をつけてみましょう
 
-テンプレートを追加して、フォーム作って、送信、あたりを作る必要があります。エンドポイントも新しくつくりましょう。ただ、ちゃんとコメントが保存されなくてもいいです。（DB実習をしてから、ちゃんとやりましょう）
+テンプレートを追加して、フォーム作って、送信、あたりを作る必要があります。エンドポイントも新しくつくりましょう。ただ、ちゃんとコメントが保存されなくてもいいです。（DB実習をしてから、ちゃんとやることにしましょう。）
 
 発展課題
 
