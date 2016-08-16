@@ -441,27 +441,36 @@ wikiのフォームにトークンが入っていることに気が付きまし�
 
 * Goとデータベース
 
+* ここまでの振り返り
+
+- MVCのCとVをやりました。
+
+.image https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/MVC-Process.svg/1000px-MVC-Process.svg.png 300 _
+
+残りのM: Modelをみていきましょう。
+
+コメント欄の実習でメモリに `map` で保持してもらいました。ここを永続化する、ということをやっていきます。
+
 * Goとデータベース: database/sql
+
+Goからデータベースを扱うときは `database/sql` を使います。
 
 .link https://golang.org/pkg/database/sql/
 .link https://golang.org/s/sqlwiki
 .link https://golang.org/s/sqldrivers
 
-MySQLだと
+MySQLでの利用例は以下を見つつ説明します。
 
 .link https://github.com/go-sql-driver/mysql/wiki/Examples
 
-SQLite3だと
-
-.link https://github.com/mattn/go-sqlite3/blob/master/_example/simple/simple.go
-
-（だいたい）同じように使える。ざっと使い方を掴みたいなら以下もおすすめです。
+以下の資料もおすすめです。
 
 .link http://go-database-sql.org/
 
 * クエリするときの原則
 
 - クエリにパラメータを埋め込むときは必ずプリペアドステートメントを使いましょう。
+- 決して `fmt.Sprintf` などによる文字列結合でクエリを組み立ててはいけません。
 
 .link https://www.ipa.go.jp/files/000024396.pdf SQLインジェクション対策について
 .link http://www.ipa.go.jp/files/000017320.pdf 安全なSQLの呼び出し方
@@ -472,20 +481,21 @@ Prepare, Query、どちらでもプリペアドステートメントが使えま
 .link https://golang.org/pkg/database/sql/#DB.Prepare
 .link https://golang.org/pkg/database/sql/#DB.Query
 
-* DB実習
+    db.Query(`select * from users where name = ?`, "s-tanno")
+
+* DB実習: 一通り自分でDB操作をしてみよう
 
 MySQLに自分用の日報を保存するコマンドラインアプリケーションをつくりましょう。
 
-- 日報用のテーブル `reports` を用意し、保存できるようにしてください。更新、削除の機能はお好みで。
-- テーブルは自分で考えてみましょう。
-- いい感じに日報を整形して標準出力できるようなオプションがあると便利でしょう。
+- 日報用のテーブル `reports` を用意し、保存できるようにしてください。更新、削除の機能はお好みで。テーブルは自分で考えてみましょう。
 
 発展課題
 
-- 日報にコメントを追加できるようにしてみましょう。
-- 複数人数でも日報が共有できる設計でつくってみましょう。
-- Webアプリにしてみましょう。
-- Markdownでもかけるようにしてみましょう。
+- いい感じに日報を整形して標準出力できるようなオプションをつけてみましょう。
+- 日報にタグを追加できるようにしてみましょう。タグによって日報を取得できるようにすると便利そうです。
+- Webアプリにしてみましょう。type Report struct に `ServeHTTP` を実装するのがおすすめです。
+
+.link https://golang.org/pkg/net/http/#Handler
 
 * データベースマイグレーション
 
@@ -493,6 +503,14 @@ MySQLに自分用の日報を保存するコマンドラインアプリケーシ
 - データベースマイグレーションをつかうと便利です
 
 .link https://github.com/rubenv/sql-migrate
+
+`suzuken/wiki` でのセットアップにすでにつかってもらっていました。`migrations` ディレクトリにSQLが入っています。 `sql-migrate` からこれらを実行できます。
+
+    sql-migrate up
+
+たとえば新しいテーブルを追加するときやスキーマを変更するときには、SQLファイルを `migrations` 以下にコミットするといいです。すると機能とセットでDBスキーマの変更もコードで管理することができます。
+
+後半環境ではDBマイグレーションをいい感じに扱う仕組みも用意しました。詳しくは [[https://github.com/s-tajima][@s-tajima]] [[https://github.com/nishigori][@nishigori]] の講義をお楽しみに。
 
 * DB実習
 
@@ -530,18 +548,51 @@ reflectをつかってstructにbindする方法があります。
 .link https://blog.golang.org/generate
 .link https://github.com/variadico/scaneo
 
-* サンプルアプリケーションの説明 その2
+* コード生成
 
-wikiよりもうちょっとモダンな作り方になっているのがこちら。
+デモします
+
+* サンプルアプリケーションの説明 その2: TODOアプリ
+
+サーバサイドにginをつかい、フロントをReactで実装したSPAのTODOアプリです。
 
 .link https://github.com/voyagegroup/gin-boilerplate
 
-コードベースは `gin-gonic` なので `suzuken/wiki` にも似ていますが、以下を変えています。スマホアプリなんかを作る場合にもこっちの設計によってくるかと。
+コードベースは `gin-gonic` なので `suzuken/wiki` にも似ていますが、以下を変えています。スマホアプリがフロントになる場合にも、設計は似ているかと思います。
 
-- JSONでのAPIでクライアントとやりとり
+- JSON APIでクライアントとやりとり
 - RestfulっぽいAPI設計
 
 コードをみつつ説明します。
+
+.link https://facebook.github.io/react/docs/thinking-in-react.html Thinking in React
+
+ModelやControllerの実装はwikiとそれほど変わりません。viewのレイヤはまるっとReactで書いています。
+
+* 実習: アプリケーションを拡張してみよう wiki編
+
+- 投稿したユーザを保存できるようにしましょう
+- 自分の投稿を一覧で見られるようにしましょう
+- 投稿に「いいね！」できるようにしてみましょう
+
+発展課題
+
+- 記事の閲覧数を保存できるようにしてみましょう。
+- 人気の投稿一覧を見られるようにしましょう。どんな投稿が人気かは自分で決めてよいです。
+- 本文中に他の記事のタイトルがあれば自動でリンクを貼るようにしてみましょう。（これをやるとwikiっぽくなりますね）
+- 記事の編集履歴をみれるようにしてみましょう。
+
+* 実習: アプリケーションを拡張してみよう TODOアプリ編
+
+- TODOにコメントを追加できるようにしてみましょう: React側のComponentも拡張するといいでしょう
+- ログインできるようにしてみましょう
+
+発展課題
+
+- TODOの進捗率を表示できるようにしてみましょう。例えば10タスクあって8タスクおわっているなら進捗80%といった具合に。
+- TODOに画像を設定できるようにしてみましょう。
+- structからRestfulなAPIをコード生成でつくってみましょう。 `Scan` を生成しているのと同じ要領で、ModelとControllerを生成するとよいでしょう。
+- GitHubアカウントでログインできるようにしてみましょう
 
 * HTTPサーバを書くときに考えることはたくさんある
 
