@@ -18,6 +18,14 @@ GitHubで公開されています。
 
 .link https://github.com/voyagegroup/talks
 
+* はじめに
+
+* Go 1.7がリリースされました！
+
+.link https://blog.golang.org/go1.7
+
+今すぐインストールしましょう。
+
 * 2日間で学んでほしいこと
 
 - Goで小さなコマンドラインツールを書けるようになること
