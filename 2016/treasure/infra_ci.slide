@@ -1,0 +1,153 @@
+インフラ・CI 最初の一歩
+Treasure2016版
+00:00 23 Aug 2016
+
+Takuya Nishigori
+Deployment prayer at VOYAGE GROUP
+@_nishigori
+https://github.com/nishigori
+
+* この資料について
+
+VOYAGE GROUPの学生エンジニア向けインターンシップTreasureの2016年度版講義資料です。
+
+.link https://voyagegroup.com/internship/treasure/
+
+GitHubで公開されています
+
+.link https://github.com/voyagegroup/talks
+
+* 今日学んでほしいこと
+
+- Linuxで何かパッケージをインストールして動かしてみよう
+- CIって何か、なんとなく分かる
+- アプリケーションのデプロイ設計
+
+* アウトライン
+
+- インフラ is 何??
+- デプロイメント ~ 解説
+- デプロイメント ~ 演習
+- デプロイメント ~ 考察
+- デプロイメント ~ デモ
+
+* インフラ is 何??
+
+インフラとは ~ コトバンク
+
+.link https://kotobank.jp/word/インフラ-12087
+
+For examples at VOYAGE GROUP:
+
+- SRE (Service Reliability Engineering)
+- IDCG (Internet Data Center Group)
+- Nothing (all for one)
+
+* OSI Reference Model
+
+.link https://ja.wikipedia.org/wiki/OSI%E5%8F%82%E7%85%A7%E3%83%A2%E3%83%87%E3%83%AB
+
+    1. 物理層  |  ハブ、ケーブル
+    1. データリンク層  |  ethernet
+    1. ネットワーク層  |  IP, IPSec, DDP
+    1. トランスポート層  |  TCP, UDP
+    1. セッション層  |  TLS, NetBIOS
+    1. プレゼンテーション層  |  SMTP, FTP, Telnt
+    1. アプリケーション層  |  HTTP, SMTP, Telnet
+
+.image https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/OSI-model-Communication.svg/434px-OSI-model-Communication.svg.png
+
+* アプリケーションエンジニアがインフラレイヤーを知る必要性
+
+- データの流れを理解したい
+- キャパシティプランニングの知見
+
+レイヤーは分かれど人が分かれるなんて定義されてない
+
+* Solving Large Scale Web Operations
+
+    This project was originally focused only on automated provisioning.
+    It's original goal was to help make sense -
+    of the various open source automation tools that are available.
+
+.image http://img.scoop.it/XfDZD6Q4FMGgvdpvfXJ3cTl72eJkfbmt4t8yenImKBVvK0kTmF0xjctABnaLJIm9
+
+.link http://cdn.oreillystatic.com/en/assets/1/event/48/Provisioning%20Toolchain%20Presentation.pdf 
+
+* デプロイメント
+
+- そもそも語源は戦争用語から来ている
+
+.link http://martinfowler.com/books/continuousDelivery.html
+
+.image http://martinfowler.com/books/continuousDelivery.jpg
+
+* デプロイメント
+** やってみよう！
+
+- 中間課題で作成したアプリケーションコードをサーバにデプロイしよう
+- 必要なミドルウェア等があればインストールしよう
+- あとで発表しよう
+
+.link https://git.io/v69TY
+
+* デプロイメント
+** 考えてみよう
+
+- まず何から始める？
+- いつデプロイすべき？
+- テスト必要？
+
+* デプロイメント
+*** 設計パターン例
+
+- push型
+- pull型
+- (+ event発火)
+
+* デプロイメント
+** DEMO
+
+* クラスタリング
+
+Slack Case Study
+
+.link https://aws.amazon.com/solutions/case-studies/slack/
+
+.image https://d0.awsstatic.com/architecture-diagrams/customers/slack-arch-diagram.png
+
+* AutoScaling
+
+.link https://aws.amazon.com/jp/cdp/cdp-autoscaling/
+
+.image https://d0.awsstatic.com/icons/jp/cdp/cdp-jp-biz-009_v3.png
+
+* サーバ構成
+** DEMO
+
+* DevOps
+
+”10 deploys per day dev & ops cooperation at Flickr”
+
+.link http://www.slideshare.net/jallspaw/10-deploys-per-day-dev-and-ops-cooperation-at-flickr/12-The_business_requires_change
+
+- 一日数十回のデプロイ
+- 当時(2009)「開発と運用が協力するなんてばかげている」とか言われてた by patrick
+
+- Automated infrastructure
+- Shared version control
+- One step build and deploy
+
+* 以下時間があったら
+
+- Daemonize (SUpervisor, daemontools, rc script)
+- Monitoring
+- F/W (netfiltering, iptables, SELinux)
+- SSL / TLS
+- HTTP2 / WebSocket
+- Benchmarking (round robin, least connections, ...)
+- Caching (CDN, Varnish, ...)
+- In-memory Database
+- Chroot
+- Hypervisor (Citrix Xen, VMWare)
+- Container (Docker, rkt, CoreOS)
