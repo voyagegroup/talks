@@ -131,13 +131,13 @@ Slack Case Study
 
 .image https://d0.awsstatic.com/architecture-diagrams/customers/slack-arch-diagram.png
 
-* AutoScaling
+* スケーラビリティ
 
 .link https://aws.amazon.com/jp/cdp/cdp-autoscaling/
 
 .image https://d0.awsstatic.com/icons/jp/cdp/cdp-jp-biz-009_v3.png
 
-* サーバ構成
+* クラスタリング / スケーラビリティ
 ** DEMO
 
 * DevOps
@@ -167,3 +167,8 @@ Slack Case Study
 - Chroot
 - Hypervisor (Citrix Xen, VMWare)
 - Container (Docker, rkt, CoreOS)
+
+* 最後に
+
+あなたのアプリケーションのよりよいデプロイメント方法は
+あなたが一番考えられるはずです
