@@ -83,6 +83,13 @@ For examples at VOYAGE GROUP:
 .image http://martinfowler.com/books/continuousDelivery.jpg
 
 * デプロイメント
+** 考えてみよう
+
+- まず何から始める？
+- いつデプロイすべき？
+- テスト必要？
+
+* デプロイメント
 ** やってみよう！
 
 - 中間課題で作成したアプリケーションコードをサーバにデプロイしよう
@@ -92,20 +99,26 @@ For examples at VOYAGE GROUP:
 .link https://git.io/v69TY
 
 * デプロイメント
-** 考えてみよう
-
-- まず何から始める？
-- いつデプロイすべき？
-- テスト必要？
-
-* デプロイメント
-*** 設計パターン例
+** 設計パターン例
 
 - push型
 - pull型
 - (+ event発火)
 
 * デプロイメント
+** DEMO
+
+* CI
+
+** 継続的に回していきたいですね
+
+- アプリケーションコードのデプロイ
+- Git commit毎にビルド実行（チェック）
+- Git commit毎にテスト実行
+- Git commitｇ（ｒｙ
+
+* CI
+
 ** DEMO
 
 * クラスタリング
@@ -142,6 +155,7 @@ Slack Case Study
 
 - Daemonize (SUpervisor, daemontools, rc script)
 - Monitoring
+- Infra testing
 - F/W (netfiltering, iptables, SELinux)
 - SSL / TLS
 - HTTP2 / WebSocket
