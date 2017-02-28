@@ -1,3 +1,4 @@
 # talks by VOYAGE GROUP
 
-see also: http://voyagegroup.com/design-and-tech/slide/archive/
+see also: https://voyagegroup.com/design-and-tech/slide/
+
