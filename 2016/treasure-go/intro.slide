@@ -226,7 +226,7 @@ Goで `go run` させられるのは `main` パッケージのみ。
 
 動作例
 
-    s.Stack := &Stack{limit: 2}
+    s := &Stack{limit: 2}
     s.Push("dataA")
     s.Push("dataB")
     s.Push("dataC")
