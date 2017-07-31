@@ -1,0 +1,754 @@
+Go入門
+Treasure2017版
+00:00 14 Aug 2017
+Tags: golang
+
+Kenta SUZUKI
+Gopher at VOYAGE GROUP
+@suzu_v
+https://github.com/suzuken
+
+* この資料について
+
+VOYAGE GROUPの学生エンジニア向けインターンシップTreasureの2017年度版講義資料です。Goの講義は3日間です。
+
+.link https://voyagegroup.com/internship/treasure/
+
+GitHubで公開されています。
+
+.link https://github.com/voyagegroup/talks
+
+* はじめに
+
+* となりの人と話しましょう 2分
+
+- 好きな言語
+- 好きなエディタ
+- 最近つくってるもの
+
+* Treasureについて簡単に
+
+- バックグラウンドの違うみなさんが3週間過ごします
+- どんどん話してください
+- コードを書いて、質問して、がっつり勉強してください
+
+Enjoy! :)
+
+* 3日間で学んでほしいこと
+
+- Goで小さなコマンドラインツールを書けるようになること
+- 一通り小さなWebアプリケーションを書けるようになること
+- Goのコードの書き方に慣れること
+
+とにかくどんどんコードを書きましょう。
+
+* アウトライン
+
+- なぜGoなのか？
+- 事前課題解説
+- testing
+- net/http
+- encoding/json
+- html/template
+- database/sql
+- Concurrency
+
+.image https://golang.org/doc/gopher/project.png
+
+* なぜGoを使うのか？
+
+いろいろな良い点があります。
+
+- 読みやすい
+- 言語仕様がfixしている
+- 軽快なbuild / 高速な動作 / concurrencyサポート
+- ツール (go tool, gofmt ...)
+- ほどよい標準ライブラリ
+
+Goの一番の特徴はSimplicityだと思います。
+
+.link https://talks.golang.org/2015/simplicity-is-complicated.slide#1 Simplicity is Complicated
+
+* 準備: Tour of Go
+
+.link https://tour.golang.org
+
+- まずTour of Goおすすめ
+- 言語仕様が簡単に学べる
+- ほどよい演習
+
+演習やってないひとはやりましょう
+
+.link https://gist.github.com/suzuken/d892c42e56c986bca813
+
+* 準備: How to write Go code
+
+.link https://golang.org/doc/code.html
+
+- `$GOPATH/bin` をPATHに追加しましょう
+- これから書いてもらうコードもGoのワークスペースに則って配置して貰う必要があります。
+- 例えば `$GOPATH/src/github.com/suzuken/wiki` などに配置します。go getをつかうとこのルールに従って配置されます。
+
+tips: ghqとpeco
+
+.link https://github.com/motemen/ghq
+.link https://github.com/peco/peco
+
+DEMOします。
+
+* 手続き、コマンドラインツール、そしてテスト
+
+* 事前課題その1
+
+n番目のフィボナッチ数を返す手続きを実装してください。
+
+    f(0) = 0
+    f(1) = 1
+    f(n+2) = f(n) + f(n+1)
+
+.link https://gist.github.com/suzuken/a8ec8fc95cd0c0d18d8d5584fdd4f3ab
+
+* 事前課題その1 フィボナッチ数 解答例
+
+    func fib(n int) int {
+        if n == 0 {
+            return 0
+        }
+        if n == 1 {
+            return 1
+        }
+        return fib(n-1) + fib(n-2)
+    }
+
+テストを書いてからリファクタリングしてみましょう。
+
+* 開発者テスト
+
+テスト大事
+
+.image https://connpass-tokyo.s3.amazonaws.com/event/27540/41d84cf0e6494e2e91e51ad8e9c85310.png
+
+.link https://golang.org/pkg/testing/
+
+* テストのないコードはレガシーコードである
+
+.image ./img/legacybook.jpg
+
+* TDDのリズム
+
+.image ./img/tddcycle.png _ 600
+.caption [[https://www.slideshare.net/t_wada/osh2014-sprit-of-tdd][TDDのこころ by twada]]
+
+* フィボナッチのテスト （発展課題 その1）
+
+.code fib/fib_test.go /func TestFib/,/^}/
+
+.link https://github.com/golang/go/wiki/TableDrivenTests
+
+    $ go test -v ./...
+    === RUN   TestFib
+    --- PASS: TestFib (0.00s)
+    PASS
+    ok      github.com/voyagegroup/talks/2017/treasure-go/fib       0.006s
+
+
+* リファクタリング
+
+.code fib/fib.go /func fib/,/^}/
+
+書き換えたらテストをします。
+
+    $ go test -v ./...
+    === RUN   TestFib
+    --- PASS: TestFib (0.00s)
+    PASS
+    ok      github.com/voyagegroup/talks/2017/treasure-go/fib       0.006s
+
+リファクタリング前にはテストを書きましょう。
+
+* コマンドラインツールをつくろう（発展課題 その2）
+
+Goで `go run` させられるのは `main` パッケージのみ。
+
+.play basic/basic.go
+
+`fib` をするコマンドラインツールをつくってみましょう。
+
+* os.Args をつかう
+
+.play fib/fib.go /func main/,/^}/
+
+ほとんどの場合は `flag` をつかったほうが楽です。
+
+.link https://golang.org/pkg/flag/
+
+* よくしたレビューコメント
+
+可読性大事。可読性のあるコードは信頼できるコードです。
+
+- `gofmt` おねがいします
+- `main` 以外で `os.Exit` や `panic` するのは大抵好ましくないです
+- `error` はよっぽど自明じゃないかぎり無視しないように
+- 変数や手続き名は `snake_case` ではなくて `camelCase`
+- 変数名は短く
+- 余分なelse: インデントを最小にしましょう
+- テストパターンが複数あるときはTableDrivenTestsおすすめ
+
+.link https://golang.org/s/style
+.link https://blog.golang.org/go-fmt-your-code
+.link https://github.com/golang/go/wiki/TableDrivenTests
+
+* Goに入ってはGoに従え
+
+.link https://ukai-go-talks.appspot.com/2014/gocon.slide#1
+
+言語ごとに作法が違う
+*作法にかなったやりかた* で書きましょう。
+
+* TDD実習 & ペアプログラミング
+
+* TDD実習の説明
+
+- これからのとなりの人と一緒にプログラムを書いてもらいます
+- どちらか1台のPCをつかいます
+- どちらか一方がテストを、どちらか一方が実装側を書きます
+
+デモします。
+
+* TDD実習 その1: スタック 30分
+
+- スタックを作成してください
+
+.image https://upload.wikimedia.org/wikipedia/commons/b/b4/Lifo_stack.png _ 350
+
+    // 簡単のため、stringしかいれられないようにしています
+    type Stack struct{}
+    func (s *Stack) Pop() string   {}
+    func (s *Stack) Push(s string) {}
+
+内部のデータ構造はsliceをつかうといいでしょう。
+
+.link https://blog.golang.org/go-slices-usage-and-internals
+
+* 動作例
+
+    s := &Stack{}
+    s.Push("dataA")
+    s.Push("dataB")
+    s.Push("dataC")
+    s.Pop() // -> "dataC"
+    s.Pop() // -> "dataB"
+    s.Push("dataD")
+    s.Pop() // -> "dataD"
+    s.Pop() // -> "dataA"
+    s.Pop() // -> ""
+
+* TDD実習 その2: 制限付きスタック 10分
+
+- スタックに最大長を設定できるようにしてください
+- 最大長を超えるPushについては、古いものから削除されるようにしましょう。
+
+動作例
+
+    s := &Stack{limit: 2}
+    s.Push("dataA")
+    s.Push("dataB")
+    s.Push("dataC")
+    s.Pop() // -> "dataC"
+    s.Pop() // -> "dataB"
+    s.Pop() // -> ""
+
+インタフェースについては自分たちで相談して決めてみましょう。
+
+発展
+
+- あとから制限長を変更できるようにしましょう
+
+* testing振り返り
+
+- どんなテストをかけばいいかを考えるのは最初は難しいかもしれません。
+- `testing` パッケージではふつうのGoコードでテストを書くことができます。テストを書くのに特別な知識は必要ありません。
+- ユニットテストを書くことで既存の機能が正常に動いていることを担保しつつ、新しい機能の追加を手助けしてくれます。
+- デバッグプリントではなく気軽にテスト書いていきましょう。
+
+* net/http 入門
+
+* net/http: Request OverView
+
+.code http/example.go /START OMIT/,/END OMIT/
+
+.link https://golang.org/pkg/net/http/
+
+* net/http 実習(30分): curl実装
+
+以下を実装してみましょう。
+
+    $ curl example.com
+
+正常系については同等に、エラーの場合については適宜わかりやすいメッセージを出力するようにしてください。
+
+できたら以下もやってみましょう。
+
+    $ curl --header "X-Treasure: 🍺" example.com
+    $ curl -H "Content-Type: application/json" -X POST -d '{"ajito":"🍺"}' example.com
+
+全部できたら好きなcurlのオプションを実装してみましょう。 (例: `-b`, `-c`, `-A` etc.)
+
+*発展課題*: このコマンドのテストを書いてみましょう。（ポイント: コマンドラインツールとしてのテストと内部APIのテストを分けて考えましょう。）
+
+* 余談: SimpleとEasy
+
+.link http://php.net/file_get_contents
+.link http://eed3si9n.com/ja/simplicity-matters シンプルさの必要性
+.link https://www.amazon.co.jp/dp/4274064069 UNIXという考え方―その設計思想と哲学
+
+: シンプルさはあとから追加できない
+
+* 事前課題その2: net/http 演習
+
+- 指定したURLにあるコンテンツについて、タイトルとdescriptionを抜き出すツールを書きましょう
+- HTTPサーバとして実装してこの機能をつかえるようにしましょう
+
+.link https://gist.github.com/suzuken/b456e0f4679f86da572839d6d86f159e
+
+    $ go run scraper/scraper.go&
+    # 自分でつくったcurlを使ってももちろんOK
+    $ curl -D - "http://localhost:8080?url=https://golang.org"
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+    Date: Fri, 05 Aug 2017 07:45:23 GMT
+    Content-Length: 57
+
+    {"title":"The Go Programming Language","description":""}
+
+この課題の狙いは、ある仕事をHTTPサーバに組み込むことを試してもらうことです。適切に仕事をわけて実装すれば、楽に組み込むことができます。
+
+* net/http.(*Server)
+
+Goの標準ライブラリでは簡単にHTTPサーバを立ち上げることができます。
+
+    func main() {
+    	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+    		// wはio.Writerなので書き込むことができます
+    		fmt.Fprint(w, "hello world")
+    	})
+    	http.ListenAndServe(":8080", nil)
+    }
+
+and
+
+    $ go run server.go&
+    $ curl http://localhost:8080
+    hello world
+
+.link https://golang.org/pkg/fmt/#Fprint
+.link https://golang.org/pkg/net/http/
+
+* encoding/json
+
+.code scraper/scraper.go /type Page/,/^}/
+
+and
+
+    enc := json.NewEncoder(w)
+    if err := enc.Encode(p); err != nil {
+        // ...
+    }
+
+すると io.Writer である `w` にJSONが出力されます。
+
+.link https://golang.org/pkg/encoding/json/
+
+
+* 2の解答例
+
+.code scraper/scraper.go /START OMIT/,/END OMIT/
+
+.link https://gist.github.com/suzuken/e211f01171e2a841ddf6417e479004e0
+
+* 2の解答例 (cont.)
+
+.code scraper/scraper.go /func handler/,/^}/
+
+.link https://gist.github.com/suzuken/e211f01171e2a841ddf6417e479004e0
+
+* io.Writer またはインタフェース
+
+    type Writer interface {
+        Write(p []byte) (n int, err error)
+    }
+
+.link https://golang.org/pkg/io/#Writer
+
+`io.Writer` を出力先としてサポートすると、Goの標準的なインタフェースを利用した機能に出力する機能を提供することができます。例えば `os.Stdout` なども `io.Writer` を実装しています。
+
+.link http://mattn.kaoriya.net/software/lang/go/20140501172821.htm Big Sky :: Golang のオフィシャルが提供するインタフェースまとめ
+.link http://spf13.com/presentation/7-biggest-mistakes-in-go/ 7 Common mistakes in Go and when to avoid them
+
+* 実習 net/http: 複数のページ取得 45分
+
+事前課題その2でつくったHTTPサーバに以下の機能を追加しましょう。
+
+- URLを複数受け取り、複数ページのtitleとdescriptionを取ってこれるようにしましょう。パラメータの渡し方はお好みで。（カンマ区切りなど）
+- 結果はJSONの配列で返すようにしましょう。その際、どのURLからどの結果が取得できたかをわかるようにしてください。
+- `og:title`, `og:image` などの [[http://ogp.me/][Open Graph protocol]]に含まれるデータもあれば取得し、同様にJSONで返せるようにしてください。
+
+発展課題
+
+- 各ページへのHTTPリクエストのタイムアウトを設定し、長く時間のかかったURLは無視できるようにしましょう。正常に取得できた結果のみ返すようにします。
+- URLごとにページの取得を並列化しましょう。すべてのページの結果が揃ったら結果を返すようにしてみましょう。
+- `net/http/httptest` をつかってこの機能のテストを書いてみましょう。
+
+* Concurrency
+
+* Goのconcurrency
+
+- goroutine: 独立してタスクを実行する。並列にできる。
+- channel: goroutineのコミュニケーションと同期を担当。
+
+> Do not communicate by sharing memory; instead, share memory by communicating.
+
+.link https://golang.org/doc/effective_go.html#concurrency
+.link https://golang.org/ref/mem
+
+* Basic: Task Queue
+
+.code concurrency/basic2.go /func main/,/^}/
+
+* Basic: Task Queue
+
+.code concurrency/basic2.go /func process/,/^}/
+.code concurrency/basic2.go /func worker/,/^}/
+
+* Basic: Channel
+
+- goroutine-safe
+- goroutine間で値を受け渡しできる
+- FIFO semantics
+- goroutineのblock / unblockが可能
+
+.link https://www.youtube.com/watch?v=KBZlN0izeiY&index=6&list=PL2ntRZ1ySWBdD9bru6IR-_WXUgJqvrtx9 GopherCon 2017: Understanding Channels
+
+* Basic: WaitGroup
+
+.code concurrency/waitgroup_primer.go /func main/,/^}/
+
+.link https://golang.org/pkg/sync/#example_WaitGroup
+
+* Data Race
+
+mapはgoroutine-safeではない。
+
+.code concurrency/race/race.go /func f/,/^}/
+
+Data Raceは2つのgoroutineが同じ変数にアクセスしており、そのうち少なくとも1つが書き込みである場合に発生する。
+
+.link https://tip.golang.org/pkg/sync/#Map
+
+* Race Detector
+
+.link https://golang.org/doc/articles/race_detector.html Data Race Detector
+
+    $ go test -race ./concurrency/race
+
+ただしすべてのraceが見つかるわけではない。
+
+* Concurrencyは設計
+
+.link https://talks.golang.org/2012/waza.slide#1 Concurrency is not Parallelism
+
+- Webサーバが数万のリクエストをさばく
+- スマートフォンで複数のAPIにバックグラウンドでリクエストを送る
+- 一方のファイルからデータを読み取り、もう一方に書き込むバッチ
+
+身近なところで（もしかしたら気にせずに）Concurrencyを使っています。
+
+_「並列にしたら遅くなったんだけど？」_
+
+.link http://freak-da.hatenablog.com/entry/20100915/p1 parallel と concurrent、並列と並行の違い
+
+* 例: 同時接続数1のEcho Server
+
+.code concurrency/echoserver.go /func main/,/^}/
+
+コネクションのハンドリングは以下の通り。
+
+.code concurrency/echoserver.go /func handleConn/,/^}/
+
+`nc localhost 8888` でデバッグしてください。
+
+TODO ファイルに書き出す
+
+* Concurrency演習1 (15分)
+
+- Stack実装をConcurrency Safeに書き直してください
+- 実際に複数のgoroutineからアクセスしてみてください
+- race detectorでデータ競合が検出されないことを確認して下さい
+
+* Concurrency演習2 (30分): duを実装しなさい
+
+duの簡易版実装をしましょう。複数のディレクトリを引数にとり、合計のファイル数及び合計のバイト数を計算して出力します。
+
+    ./du dir1 dir2 dir3
+    4 files, 586454 bytes
+
+いろんなConcurrencyパターンを試してみてください。
+
+- ディレクトリごとにgoroutine
+- 1階層下のtreeごとにgoroutine
+- あるいはあなたの考えた最高のパターン
+
+実行時間を計測してどのパターンが速いか調べてみましょう。
+
+* 小さなWebアプリケーションを実装しよう
+
+* ところで
+
+Webアプリケーションってなんでしょう？
+
+- HTTPリクエスト受け付ければWebアプリケーション？
+- フォームがあるもの？
+- たくさんページがあればWebアプリ？
+- ユーザが使えばWebアプリ？
+- 入出力によってページ内容がかわればWebアプリ？
+- TwitterやGoogleはWebアプリ？
+
+Webアプリとひとえにいってもいろいろありますね。
+
+* 実アプリケーションの例
+
+.link https://github.com/suzuken/wiki
+
+デモしつつ解説します。MySQLがあれば手元でも動かせるので、やってみてください。
+機能は以下のもののみです。
+
+- ユーザ登録とログイン・ログアウト
+- 記事の投稿・編集・削除
+
+このあとの実習でこのアプリケーションに機能を追加してもらいます。
+
+* よくあるWebアプリケーションの構成
+
+今回はいわゆるMVCの構成にしてみました。Goのpackageの機能をつかってディレクトリをわけているだけです。
+
+コードをみつつ、1つ1つ中身を解説します。
+
+.image https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/MVC-Process.svg/1000px-MVC-Process.svg.png 300 _
+
+* なぜこういう構成なの？
+
+Webアプリケーションによくある仕事をわけると、下の3つの層に分けることができます。
+
+- データソースからの参照、あるいは更新をする層
+- ユーザへの見せ方をいい感じに整える層
+- HTTPリクエストをうけて、仕事を制御して振り分ける層
+
+.link http://www.slideshare.net/brtriver/php-14295877 フラットなPHPからフレームワークへ
+
+仕事をわけることで、各実装をシンプルにすることができます。ただし分割しすぎるのはよくありません。またGo特有ですが、適切にpackageを分割することによるメリットもあります。
+
+- 構造体やインタフェースの名前をシンプルにできる。
+- 依存関係が明瞭になり、package単位のテストを書きやすくなる。
+
+* テンプレート
+
+* WebアプリケーションにおけるHTMLテンプレート
+
+- 構造化してviewをつくる
+- 適切にエスケープをしてHTMLを出力する
+
+スマートフォンアプリだったりクライアントサイドでテンプレートの機能をもっているものをつかうと、この仕事はサーバサイドではやらないことになります。
+
+.link http://www.slideshare.net/ockeghem/xssreintroduction
+
+* html/template の利用例
+
+.play template/template.go /func main/,/^}/
+
+* 実習: コメント欄の追加
+
+- 記事にコメント欄をつけてみましょう
+
+テンプレートを追加して、フォーム作って、送信、あたりを作る必要があります。エンドポイントも新しくつくりましょう。ただ、ちゃんとコメントが保存されなくてもいいです。（DB実習をしてから、ちゃんとやることにしましょう。）
+
+発展課題
+
+- コメント内容をメモリ上に保存できるようにしてみましょう。適当な `map[int][]string` なんかにいれるといいかも？誰のコメントかとりあえず気にしなくてもいいです。
+- 誰のコメントかも保存できるようにしてみましょう。`type Comment struct` をつくって上の `map` の値としていれられるといいかもしれません。
+
+* 実習: CSRF対策
+
+wikiのフォームにトークンが入っていることに気が付きましたか？
+
+    <input type="hidden" name="gorilla.csrf.Token" value="...">
+
+.link https://www.ipa.go.jp/security/awareness/vendor/programmingv2/contents/301.html IPA CSRF対策
+
+実習: CSRFトークンをブラウザの開発ツールで上書きして、リクエストが失敗することを確認してみましょう。
+
+* Goとデータベース
+
+* ここまでの振り返り
+
+- MVCのCとVをやりました。
+
+.image https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/MVC-Process.svg/1000px-MVC-Process.svg.png 300 _
+
+残りのM: Modelをみていきましょう。
+
+コメント欄の実習でメモリに `map` で保持してもらいました。ここを永続化する、ということをやっていきます。
+
+* Goとデータベース: database/sql
+
+Goからデータベースを扱うときは `database/sql` を使います。
+
+.link https://golang.org/pkg/database/sql/
+.link https://golang.org/s/sqlwiki
+.link https://golang.org/s/sqldrivers
+
+MySQLでの利用例は以下を見つつ説明します。
+
+.link https://github.com/go-sql-driver/mysql/wiki/Examples
+
+以下の資料もおすすめです。
+
+.link http://go-database-sql.org/
+
+* クエリするときの原則
+
+- クエリにパラメータを埋め込むときは必ずプリペアドステートメントを使いましょう。
+- 決して `fmt.Sprintf` などによる文字列結合でクエリを組み立ててはいけません。
+
+.link https://www.ipa.go.jp/files/000024396.pdf SQLインジェクション対策について
+.link http://www.ipa.go.jp/files/000017320.pdf 安全なSQLの呼び出し方
+.link http://d.hatena.ne.jp/ajiyoshi/20100409/1270809525
+
+Prepare, Query、どちらでもプリペアドステートメントが使えます。
+
+.link https://golang.org/pkg/database/sql/#DB.Prepare
+.link https://golang.org/pkg/database/sql/#DB.Query
+
+    db.Query(`select * from users where name = ?`, "s-tanno")
+
+* DB実習: 一通り自分でDB操作をしてみよう
+
+MySQLに自分用の日報を保存するコマンドラインアプリケーションをつくりましょう。
+
+- 日報用のテーブル `reports` を用意し、保存できるようにしてください。更新、削除の機能はお好みで。テーブルは自分で考えてみましょう。
+
+発展課題
+
+- いい感じに日報を整形して標準出力できるようなオプションをつけてみましょう。
+- 日報にタグを追加できるようにしてみましょう。タグによって日報を取得できるようにすると便利そうです。
+- Webアプリにしてみましょう。type Report struct に `ServeHTTP` を実装するのがおすすめです。
+
+.link https://golang.org/pkg/net/http/#Handler
+
+* データベースマイグレーション
+
+- 複数人でアプリケーションをつくるときにスキーマの管理どうしますか？
+- データベースマイグレーションをつかうと便利です
+
+.link https://github.com/rubenv/sql-migrate
+
+`suzuken/wiki` でのセットアップにすでにつかってもらっていました。`migrations` ディレクトリにSQLが入っています。 `sql-migrate` からこれらを実行できます。
+
+    sql-migrate up
+
+たとえば新しいテーブルを追加するときやスキーマを変更するときには、SQLファイルを `migrations` 以下にコミットするといいです。すると機能とセットでDBスキーマの変更もコードで管理することができます。
+
+後半環境ではDBマイグレーションをいい感じに扱う仕組みも用意しました。詳しくは [[https://github.com/s-tajima][@s-tajima]] [[https://github.com/nishigori][@nishigori]] の講義をお楽しみに。
+
+* DB実習
+
+wikiの記事につけたコメントをちゃんとDBに保存できるようにしてみましょう。
+
+テーブル例
+
+    CREATE TABLE `comments` (
+      `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+      `article_id` int(11) NOT NULL,
+      `body` TEXT NOT NULL,
+      `created` timestamp NOT NULL DEFAULT NOW(),
+      `updated` timestamp NOT NULL DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (`comment_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='list of comments';
+
+- データベースマイグレーションも用意してあるので、つかってみるといいでしょう
+
+発展課題
+
+- コメントについて誰がコメントしたかも保存できるようにしましょう
+- コメントの編集削除をサポートしましょう
+- トップページに記事のコメント数も出すようにしましょう
+
+* Tips: クエリ結果のstructへのbind
+
+reflectをつかってstructにbindする方法があります。
+
+.link https://github.com/jmoiron/sqlx
+.link https://github.com/naoina/genmai
+
+`suzuken/go-todo` では `sqlx` をつかっています。
+
+またはコード生成をつかうのも良い選択でしょう。 `database/sql` のための `Scan` 用手続きをstructから生成すると便利です。 `suzuken/wiki` では `scaneo` をつかっています。
+
+.link https://blog.golang.org/generate
+.link https://github.com/variadico/scaneo
+
+* コード生成
+
+デモします
+
+* サンプルアプリケーションの説明 その2: TODOアプリ
+
+フロントをReactで実装したSPAのTODOアプリです。
+
+.link https://github.com/suzuken/go-todo
+
+`suzuken/wiki` にも似ていますが、以下を変えています。スマホアプリがフロントになる場合にも、設計は似ているかと思います。
+
+- JSON APIでクライアントとやりとり
+- RESTfulなAPI設計
+
+コードをみつつ説明します。
+
+.link https://facebook.github.io/react/docs/thinking-in-react.html Thinking in React
+
+ModelやControllerの実装はwikiとそれほど変わりません。viewのレイヤはまるっとReactで書いています。
+
+* 実習: アプリケーションを拡張してみよう wiki編
+
+- 投稿したユーザを保存できるようにしましょう
+- 自分の投稿を一覧で見られるようにしましょう
+- 投稿に「いいね！」できるようにしてみましょう
+
+発展課題
+
+- 記事の閲覧数を保存できるようにしてみましょう。
+- 人気の投稿一覧を見られるようにしましょう。どんな投稿が人気かは自分で決めてよいです。
+- 本文中に他の記事のタイトルがあれば自動でリンクを貼るようにしてみましょう。（これをやるとwikiっぽくなりますね）
+- 記事の編集履歴をみれるようにしてみましょう。
+- Markdownでかけるようにしてみましょう。
+
+* 実習: アプリケーションを拡張してみよう TODOアプリ編
+
+- TODOにコメントを追加できるようにしてみましょう: React側のComponentも拡張するといいでしょう
+- ログインできるようにしてみましょう
+
+発展課題
+
+- TODOの進捗率を表示できるようにしてみましょう。例えば10タスクあって8タスクおわっているなら進捗80%といった具合に。
+- TODOに画像を設定できるようにしてみましょう。
+- structからRestfulなAPIをコード生成でつくってみましょう。 `Scan` を生成しているのと同じ要領で、ModelとControllerを生成するとよいでしょう。
+- GitHubアカウントでログインできるようにしてみましょう
+
+* HTTPサーバを書くときに考えることはたくさんある
+
+- どのようなHTTPリクエストを受け取るか
+- どのようなルーティングにすべきか
+- HTTPレスポンスステータスは何にすべきか
+- HTTPレスポンスヘッダには何を入れるべきか
+- HTTPレスポンスボディにはどのような形式で返すべきか
+
+より詳しくは [[https://twitter.com/gomachan46][@gomachan46]] の講義でやります
