@@ -21,7 +21,7 @@ GitHubで公開されています。
 
 * はじめに
 
-* となりの人と話しましょう 2分
+* となりの人と話しましょう 1分
 
 - 好きな言語
 - 好きなエディタ
@@ -412,6 +412,22 @@ and
 .link https://golang.org/doc/effective_go.html#concurrency
 .link https://golang.org/ref/mem
 
+* 例: 同時接続数1のEcho Server
+
+.code concurrency/echoserver.go /func main/,/^}/
+
+コネクションのハンドリングは以下の通り。
+
+.code concurrency/echoserver.go /func handleConn/,/^}/
+
+`nc localhost 8888` でつないでみてください。
+
+* 例: 並列リクエスト
+
+.code concurrency/waitgroup_primer.go /func main/,/^}/
+
+.link https://golang.org/pkg/sync/#example_WaitGroup
+
 * Basic: Task Queue
 
 .code concurrency/basic2.go /func main/,/^}/
@@ -429,12 +445,6 @@ and
 - goroutineのblock / unblockが可能
 
 .link https://www.youtube.com/watch?v=KBZlN0izeiY&index=6&list=PL2ntRZ1ySWBdD9bru6IR-_WXUgJqvrtx9 GopherCon 2017: Understanding Channels
-
-* Basic: WaitGroup
-
-.code concurrency/waitgroup_primer.go /func main/,/^}/
-
-.link https://golang.org/pkg/sync/#example_WaitGroup
 
 * Data Race
 
@@ -454,6 +464,12 @@ Data Raceは2つのgoroutineが同じ変数にアクセスしており、その�
 
 ただしすべてのraceが見つかるわけではない。
 
+* Concurrency演習1 (20分)
+
+- Stack実装をgoroutine-safeに書き直してください（おそらく既にgoroutine-safeに実装されている場合がほとんどだと思います）
+- 実際に複数のgoroutineからアクセスしてみてください
+- race detectorでデータ競合が検出されないことを確認して下さい
+
 * Concurrencyは設計
 
 .link https://talks.golang.org/2012/waza.slide#1 Concurrency is not Parallelism
@@ -468,24 +484,6 @@ _「並列にしたら遅くなったんだけど？」_
 
 .link http://freak-da.hatenablog.com/entry/20100915/p1 parallel と concurrent、並列と並行の違い
 
-* 例: 同時接続数1のEcho Server
-
-.code concurrency/echoserver.go /func main/,/^}/
-
-コネクションのハンドリングは以下の通り。
-
-.code concurrency/echoserver.go /func handleConn/,/^}/
-
-`nc localhost 8888` でデバッグしてください。
-
-TODO ファイルに書き出す
-
-* Concurrency演習1 (15分)
-
-- Stack実装をConcurrency Safeに書き直してください
-- 実際に複数のgoroutineからアクセスしてみてください
-- race detectorでデータ競合が検出されないことを確認して下さい
-
 * Concurrency演習2 (30分): duを実装しなさい
 
 duの簡易版実装をしましょう。複数のディレクトリを引数にとり、合計のファイル数及び合計のバイト数を計算して出力します。
@@ -493,13 +491,19 @@ duの簡易版実装をしましょう。複数のディレクトリを引数に
     ./du dir1 dir2 dir3
     4 files, 586454 bytes
 
-いろんなConcurrencyパターンを試してみてください。
+まずはgoroutineを使わないで実装してみましょう。その後、いろんなConcurrencyパターンを試してみてください。
 
 - ディレクトリごとにgoroutine
 - 1階層下のtreeごとにgoroutine
 - あるいはあなたの考えた最高のパターン
 
 実行時間を計測してどのパターンが速いか調べてみましょう。
+
+* Concurrencyまとめ
+
+- Goではgoroutineとchannelを使うことで既存実装をConcurrencyを利用した世界に適用できます。
+- ただしデータ競合には気をつけましょう。
+- 並列にする前に直列で十分ではないかどうか考えましょう。適切な箇所でConcurrencyを使いましょう。
 
 * 小さなWebアプリケーションを実装しよう
 
@@ -558,7 +562,7 @@ Webアプリケーションによくある仕事をわけると、下の3つの�
 - 構造化してviewをつくる
 - 適切にエスケープをしてHTMLを出力する
 
-スマートフォンアプリだったりクライアントサイドでテンプレートの機能をもっているものをつかうと、この仕事はサーバサイドではやらないことになります。
+クライアントサイドでテンプレートを担当する場合、サーバサイドでテンプレートを使う必要性は減ります。
 
 .link http://www.slideshare.net/ockeghem/xssreintroduction
 
@@ -586,6 +590,8 @@ wikiのフォームにトークンが入っていることに気が付きまし�
 .link https://www.ipa.go.jp/security/awareness/vendor/programmingv2/contents/301.html IPA CSRF対策
 
 実習: CSRFトークンをブラウザの開発ツールで上書きして、リクエストが失敗することを確認してみましょう。
+
+CSRF, XSSまわりなどについては来週の [[https://twitter.com/co3k][@co3k]] のセキュリティ講義で詳しくやります。
 
 * Goとデータベース
 
