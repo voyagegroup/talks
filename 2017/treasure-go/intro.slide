@@ -225,7 +225,7 @@ Goで `go run` させられるのは `main` パッケージのみ。
     // 簡単のため、stringしかいれられないようにしています
     type Stack struct{}
     func (s *Stack) Pop() string   {}
-    func (s *Stack) Push(s string) {}
+    func (s *Stack) Push(ss string) {}
 
 内部のデータ構造はsliceをつかうといいでしょう。
 

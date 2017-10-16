@@ -14,7 +14,7 @@ func fib(n int) int {
 }
 
 func main() {
-	if len(os.Args) < 1 {
+	if len(os.Args) < 2 {
 		fmt.Print("usage: ./fib [integer]")
 		os.Exit(1)
 	}
