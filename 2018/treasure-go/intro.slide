@@ -1,0 +1,375 @@
+Go入門
+Treasure2018版
+00:00 13 Aug 2018
+Tags: golang
+
+Kenta SUZUKI
+Gopher at VOYAGE GROUP
+@suzu_v
+https://github.com/suzuken
+
+* この資料について
+
+VOYAGE GROUPの学生エンジニア向けインターンシップTreasureの2018年度版講義資料です。Goの講義は2日間です。
+
+.link https://voyagegroup.com/internship/treasure/
+
+GitHubで公開されています。
+
+.link https://github.com/voyagegroup/talks
+.link https://go-talks.appspot.com/github.com/voyagegroup/talks/2018/treasure-go/intro.slide
+
+今年のGo講義は一日目がsuzuken、二日目はsaxsir担当です。
+
+* はじめに
+
+* となりの人と話しましょう 1分
+
+- 好きな言語
+- 好きなエディタ
+- 最近つくってるもの
+
+* Treasureについて簡単に
+
+- バックグラウンドの違うみなさんが3週間過ごします
+- どんどん話してください
+- コードを書いて、質問して、がっつり勉強してください
+
+Enjoy! :)
+
+* 2日間で学んでほしいこと
+
+- Goで小さなコマンドラインツールを書けるようになること
+- 一通り小さなWebアプリケーションを書けるようになること
+- Goのコードの書き方に慣れること
+
+とにかくどんどんコードを書きましょう。
+
+* アウトライン
+
+- なぜGoなのか？
+- 事前課題解説
+- testing
+- net/http
+- encoding/json
+- database/sql
+- APIサーバの作り方
+
+.image https://golang.org/doc/gopher/project.png
+
+* なぜGoを使うのか？
+
+いろいろな良い点があります。
+
+- 読みやすい
+- 言語仕様がfixしている
+- 軽快なbuild / 高速な動作 / concurrencyサポート
+- ツール (go tool, gofmt ...)
+- ほどよい標準ライブラリ
+
+Goの一番の特徴はSimplicityだと思います。
+
+.link https://talks.golang.org/2015/simplicity-is-complicated.slide#1 Simplicity is Complicated
+
+* 準備: Tour of Go
+
+.link https://tour.golang.org
+
+- まずTour of Goおすすめ
+- 言語仕様が簡単に学べる
+- ほどよい演習
+
+演習やってないひとはやりましょう
+
+.link https://gist.github.com/suzuken/d892c42e56c986bca813
+
+* 準備: How to write Go code
+
+.link https://golang.org/doc/code.html
+
+- `$GOPATH/bin` をPATHに追加しましょう
+- これから書いてもらうコードもGoのワークスペースに則って配置して貰う必要があります。
+- 例えば `$GOPATH/src/github.com/suzuken/wiki` などに配置します。go getをつかうとこのルールに従って配置されます。
+
+tips: ghqとpeco
+
+.link https://github.com/motemen/ghq
+.link https://github.com/peco/peco
+
+DEMOします。
+
+* 手続き、コマンドラインツール、そしてテスト
+
+* 事前課題その1
+
+n番目のフィボナッチ数を返す手続きを実装してください。
+
+    f(0) = 0
+    f(1) = 1
+    f(n+2) = f(n) + f(n+1)
+
+.link https://gist.github.com/suzuken/a8ec8fc95cd0c0d18d8d5584fdd4f3ab
+
+* 事前課題その1 フィボナッチ数 解答例
+
+    func fib(n int) int {
+        if n == 0 {
+            return 0
+        }
+        if n == 1 {
+            return 1
+        }
+        return fib(n-1) + fib(n-2)
+    }
+
+テストを書いてからリファクタリングしてみましょう。
+
+* 開発者テスト
+
+テスト大事
+
+.image https://connpass-tokyo.s3.amazonaws.com/event/27540/41d84cf0e6494e2e91e51ad8e9c85310.png
+
+.link https://golang.org/pkg/testing/
+
+* テストのないコードはレガシーコードである
+
+.image ./img/legacybook.jpg
+
+* TDDのリズム
+
+.image ./img/tddcycle.png _ 600
+.caption [[https://www.slideshare.net/t_wada/osh2014-sprit-of-tdd][TDDのこころ by twada]]
+
+* フィボナッチのテスト （発展課題 その1）
+
+.code fib/fib_test.go /func TestFib/,/^}/
+
+.link https://github.com/golang/go/wiki/TableDrivenTests
+
+    $ go test -v ./...
+    === RUN   TestFib
+    --- PASS: TestFib (0.00s)
+    PASS
+    ok      github.com/voyagegroup/talks/2018/treasure-go/fib       0.006s
+
+
+* リファクタリング
+
+.code fib/fib.go /func fib/,/^}/
+
+書き換えたらテストをします。
+
+    $ go test -v ./...
+    === RUN   TestFib
+    --- PASS: TestFib (0.00s)
+    PASS
+    ok      github.com/voyagegroup/talks/2018/treasure-go/fib       0.006s
+
+リファクタリング前にはテストを書きましょう。
+
+* コマンドラインツールをつくろう（発展課題 その2）
+
+Goで `go run` させられるのは `main` パッケージのみ。
+
+.play basic/basic.go
+
+`fib` をするコマンドラインツールをつくってみましょう。
+
+* os.Args をつかう
+
+.play fib/fib.go /func main/,/^}/
+
+ほとんどの場合は `flag` をつかったほうが楽です。
+
+.link https://golang.org/pkg/flag/
+
+* よくしたレビューコメント
+
+可読性大事。可読性の高いコードは信頼できるコードです。
+
+- `gofmt` おねがいします
+- `main` 以外で `os.Exit` や `panic` するのは大抵好ましくないです
+- `error` はよっぽど自明じゃないかぎり無視しないように
+- 変数や手続き名は `snake_case` ではなくて `camelCase`
+- 変数名は短く
+- [[https://github.com/golang/go/wiki/CodeReviewComments#indent-error-flow][通常のコードパスはインデントを最小に]]
+- [[https://github.com/golang/go/wiki/TableDrivenTests][テストパターンが複数あるときはTableDrivenTestsおすすめ]]
+
+.link https://golang.org/s/style
+.link https://blog.golang.org/go-fmt-your-code
+
+* Goに入ってはGoに従え
+
+.link https://ukai-go-talks.appspot.com/2014/gocon.slide#1
+
+言語ごとに作法が違う
+*作法にかなったやりかた* で書きましょう。
+
+* TDD実習 & ペアプログラミング
+
+* TDD実習の説明
+
+- これからのとなりの人と一緒にプログラムを書いてもらいます
+- どちらか1台のPCをつかいます
+- どちらか一方がテストを、どちらか一方が実装側を書きます
+
+デモします。
+
+* TDD実習 その1: スタック 30分
+
+- スタックを作成してください
+
+.image https://upload.wikimedia.org/wikipedia/commons/b/b4/Lifo_stack.png _ 350
+
+    // 簡単のため、stringしかいれられないようにしています
+    type Stack struct{}
+    func (s *Stack) Pop() string   {}
+    func (s *Stack) Push(ss string) {}
+
+内部のデータ構造はsliceをつかうといいでしょう。
+
+.link https://blog.golang.org/go-slices-usage-and-internals
+
+* 動作例
+
+    s := &Stack{}
+    s.Push("dataA")
+    s.Push("dataB")
+    s.Push("dataC")
+    s.Pop() // -> "dataC"
+    s.Pop() // -> "dataB"
+    s.Push("dataD")
+    s.Pop() // -> "dataD"
+    s.Pop() // -> "dataA"
+    s.Pop() // -> ""
+
+* TDD実習 その2: 制限付きスタック 10分
+
+- スタックに最大長を設定できるようにしてください
+- 最大長を超えるPushについては、古いものから削除されるようにしましょう。
+
+動作例
+
+    s := &Stack{limit: 2}
+    s.Push("dataA")
+    s.Push("dataB")
+    s.Push("dataC")
+    s.Pop() // -> "dataC"
+    s.Pop() // -> "dataB"
+    s.Pop() // -> ""
+
+インタフェースについては自分たちで相談して決めてみましょう。
+
+発展
+
+- あとから制限長を変更できるようにしましょう
+
+* testing振り返り
+
+- どんなテストをかけばいいかを考えるのは最初は難しいかもしれません。
+- `testing` パッケージではふつうのGoコードでテストを書くことができます。テストを書くのに特別な知識は必要ありません。
+- ユニットテストを書くことで既存の機能が正常に動いていることを担保しつつ、新しい機能の追加を手助けしてくれます。
+- デバッグプリントではなく気軽にテスト書いていきましょう。
+
+* net/http 入門
+
+* net/http: Request OverView
+
+.code http/example.go /START OMIT/,/END OMIT/
+
+.link https://golang.org/pkg/net/http/
+
+* net/http 実習(40分): curl実装
+
+以下を実装してみましょう。
+
+    $ curl example.com
+
+正常系については同等に、エラーの場合については適宜わかりやすいメッセージを出力するようにしてください。
+
+できたらHTTPヘッダーの変更、メソッドの変更もやってみましょう。
+
+    $ curl --header "X-Treasure: 🍺" example.com
+    $ curl -H "Content-Type: application/json" -X POST -d '{"ajito":"🍺"}' example.com
+
+全部できたら好きなcurlのオプションを実装してみましょう。 (例: `--cookie`, `--cookie-jar`, `--user-agent` etc.)
+
+*発展課題*: このコマンドのテストを書いてみましょう。（ポイント: コマンドラインツールとしてのテストと内部APIのテストを分けて考えましょう。）
+
+* 余談: SimpleとEasy
+
+.link http://php.net/file_get_contents
+.link http://eed3si9n.com/ja/simplicity-matters シンプルさの必要性
+.link https://www.amazon.co.jp/dp/4274064069 UNIXという考え方―その設計思想と哲学
+
+: シンプルさはあとから追加できない
+
+* 事前課題その2: net/http 演習
+
+- 指定したURLにあるコンテンツについて、タイトルとdescriptionを抜き出すツールを書きましょう
+- HTTPサーバとして実装してこの機能をつかえるようにしましょう
+
+.link https://gist.github.com/suzuken/b456e0f4679f86da572839d6d86f159e
+
+    $ go run scraper/scraper.go&
+    # 自分でつくったcurlを使ってももちろんOK
+    $ curl -D - "http://localhost:8080?url=https://golang.org"
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+    Date: Fri, 05 Aug 2018 07:45:23 GMT
+    Content-Length: 57
+
+    {"title":"The Go Programming Language","description":""}
+
+この課題の狙いは、ある仕事をHTTPサーバに組み込むことを試してもらうことです。適切に仕事をわけて実装すれば、楽に組み込むことができます。
+
+* net/http.(*Server)
+
+Goの標準ライブラリでは簡単にHTTPサーバを立ち上げることができます。
+
+    func main() {
+    	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+    		// wはio.Writerなので書き込むことができます
+    		fmt.Fprint(w, "hello world")
+    	})
+    	http.ListenAndServe(":8080", nil)
+    }
+
+and
+
+    $ go run server.go&
+    $ curl http://localhost:8080
+    hello world
+
+.link https://golang.org/pkg/fmt/#Fprint
+.link https://golang.org/pkg/net/http/
+
+* encoding/json
+
+.code scraper/scraper.go /type Page/,/^}/
+
+and
+
+    enc := json.NewEncoder(w)
+    if err := enc.Encode(p); err != nil {
+        // ...
+    }
+
+すると io.Writer である `w` にJSONが出力されます。
+
+.link https://golang.org/pkg/encoding/json/
+
+* 実習 net/http: 複数のページ取得 45分
+
+事前課題その2でつくったHTTPサーバに以下の機能を追加しましょう。
+
+- URLを複数受け取り、複数ページのtitleとdescriptionを取ってこれるようにしましょう。パラメータの渡し方はお好みで。（カンマ区切りなど）
+- 結果はJSONの配列で返すようにしましょう。その際、どのURLからどの結果が取得できたかをわかるようにしてください。
+- `og:title`, `og:image` などの [[http://ogp.me/][Open Graph protocol]]に含まれるデータもあれば取得し、同様にJSONで返せるようにしてください。
+
+発展課題
+
+- 各ページへのHTTPリクエストのタイムアウトを設定し、長く時間のかかったURLは無視できるようにしましょう。正常に取得できた結果のみ返すようにします。
+- URLごとにページの取得を並列化しましょう。すべてのページの結果が揃ったら結果を返すようにしてみましょう。
+- [[https://golang.org/pkg/net/http/httptest/][net/http/httptest]] をつかってこの機能のテストを書いてみましょう。
