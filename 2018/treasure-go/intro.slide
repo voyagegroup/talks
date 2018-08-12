@@ -280,7 +280,7 @@ Goで `go run` させられるのは `main` パッケージのみ。
 
 .link https://golang.org/pkg/net/http/
 
-* net/http 実習(30分): curl実装
+* net/http 実習(40分): curl実装
 
 以下を実装してみましょう。
 
@@ -288,12 +288,12 @@ Goで `go run` させられるのは `main` パッケージのみ。
 
 正常系については同等に、エラーの場合については適宜わかりやすいメッセージを出力するようにしてください。
 
-できたら以下もやってみましょう。
+できたらHTTPヘッダーの変更、メソッドの変更もやってみましょう。
 
     $ curl --header "X-Treasure: 🍺" example.com
     $ curl -H "Content-Type: application/json" -X POST -d '{"ajito":"🍺"}' example.com
 
-全部できたら好きなcurlのオプションを実装してみましょう。 (例: `-b`, `-c`, `-A` etc.)
+全部できたら好きなcurlのオプションを実装してみましょう。 (例: `--cookie`, `--cookie-jar`, `--user-agent` etc.)
 
 *発展課題*: このコマンドのテストを書いてみましょう。（ポイント: コマンドラインツールとしてのテストと内部APIのテストを分けて考えましょう。）
 
@@ -372,35 +372,4 @@ and
 
 - 各ページへのHTTPリクエストのタイムアウトを設定し、長く時間のかかったURLは無視できるようにしましょう。正常に取得できた結果のみ返すようにします。
 - URLごとにページの取得を並列化しましょう。すべてのページの結果が揃ったら結果を返すようにしてみましょう。
-- `net/http/httptest` をつかってこの機能のテストを書いてみましょう。
-
-* io.Writer またはインタフェース
-
-    type Writer interface {
-        Write(p []byte) (n int, err error)
-    }
-
-.link https://golang.org/pkg/io/#Writer
-
-`io.Writer` を出力先としてサポートすると、Goの標準的なインタフェースを利用した機能に出力する機能を提供することができます。例えば `os.Stdout` なども `io.Writer` を実装しています。
-
-.link http://mattn.kaoriya.net/software/lang/go/20140501172821.htm Big Sky :: Golang のオフィシャルが提供するインタフェースまとめ
-.link http://spf13.com/presentation/7-biggest-mistakes-in-go/ 7 Common mistakes in Go and when to avoid them
-
-
-* 演習2 (30分): duを実装しなさい
-
-duの簡易版実装をしましょう。複数のディレクトリを引数にとり、合計のファイル数及び合計のバイト数を計算して出力します。
-
-    ./du dir1 dir2 dir3
-    4 files, 586454 bytes
-
-発展課題
-
-いろいろなConcurrencyパターンを試してみてください。
-
-- ディレクトリごとにgoroutine
-- 1階層下のtreeごとにgoroutine
-- あるいはあなたの考えた最高のパターン
-
-実行時間を計測してどのパターンが速いか調べてみましょう。
+- [[https://golang.org/pkg/net/http/httptest/][net/http/httptest]] をつかってこの機能のテストを書いてみましょう。
