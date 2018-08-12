@@ -1,6 +1,6 @@
 Go入門
 Treasure2018版
-00:00 14 Aug 2018
+00:00 13 Aug 2018
 Tags: golang
 
 Kenta SUZUKI
@@ -10,7 +10,7 @@ https://github.com/suzuken
 
 * この資料について
 
-VOYAGE GROUPの学生エンジニア向けインターンシップTreasureの2018年度版講義資料です。Goの講義は3日間です。
+VOYAGE GROUPの学生エンジニア向けインターンシップTreasureの2018年度版講義資料です。Goの講義は2日間です。
 
 .link https://voyagegroup.com/internship/treasure/
 
@@ -186,19 +186,18 @@ Goで `go run` させられるのは `main` パッケージのみ。
 
 * よくしたレビューコメント
 
-可読性大事。可読性のあるコードは信頼できるコードです。
+可読性大事。可読性の高いコードは信頼できるコードです。
 
 - `gofmt` おねがいします
 - `main` 以外で `os.Exit` や `panic` するのは大抵好ましくないです
 - `error` はよっぽど自明じゃないかぎり無視しないように
 - 変数や手続き名は `snake_case` ではなくて `camelCase`
 - 変数名は短く
-- 余分なelse: インデントを最小にしましょう
-- テストパターンが複数あるときはTableDrivenTestsおすすめ
+- [[https://github.com/golang/go/wiki/CodeReviewComments#indent-error-flow][通常のコードパスはインデントを最小に]]
+- [[https://github.com/golang/go/wiki/TableDrivenTests][テストパターンが複数あるときはTableDrivenTestsおすすめ]]
 
 .link https://golang.org/s/style
 .link https://blog.golang.org/go-fmt-your-code
-.link https://github.com/golang/go/wiki/TableDrivenTests
 
 * Goに入ってはGoに従え
 
@@ -361,16 +360,19 @@ and
 
 .link https://golang.org/pkg/encoding/json/
 
+* 実習 net/http: 複数のページ取得 45分
 
-* 2の解答例
+事前課題その2でつくったHTTPサーバに以下の機能を追加しましょう。
 
-.link https://gist.github.com/suzuken/e211f01171e2a841ddf6417e479004e0
+- URLを複数受け取り、複数ページのtitleとdescriptionを取ってこれるようにしましょう。パラメータの渡し方はお好みで。（カンマ区切りなど）
+- 結果はJSONの配列で返すようにしましょう。その際、どのURLからどの結果が取得できたかをわかるようにしてください。
+- `og:title`, `og:image` などの [[http://ogp.me/][Open Graph protocol]]に含まれるデータもあれば取得し、同様にJSONで返せるようにしてください。
 
-* 2の解答例 (cont.)
+発展課題
 
-.code scraper/scraper.go /func handler/,/^}/
-
-.link https://gist.github.com/suzuken/e211f01171e2a841ddf6417e479004e0
+- 各ページへのHTTPリクエストのタイムアウトを設定し、長く時間のかかったURLは無視できるようにしましょう。正常に取得できた結果のみ返すようにします。
+- URLごとにページの取得を並列化しましょう。すべてのページの結果が揃ったら結果を返すようにしてみましょう。
+- `net/http/httptest` をつかってこの機能のテストを書いてみましょう。
 
 * io.Writer またはインタフェース
 
@@ -385,19 +387,6 @@ and
 .link http://mattn.kaoriya.net/software/lang/go/20140501172821.htm Big Sky :: Golang のオフィシャルが提供するインタフェースまとめ
 .link http://spf13.com/presentation/7-biggest-mistakes-in-go/ 7 Common mistakes in Go and when to avoid them
 
-* 実習 net/http: 複数のページ取得 45分
-
-事前課題その2でつくったHTTPサーバに以下の機能を追加しましょう。
-
-- URLを複数受け取り、複数ページのtitleとdescriptionを取ってこれるようにしましょう。パラメータの渡し方はお好みで。（カンマ区切りなど）
-- 結果はJSONの配列で返すようにしましょう。その際、どのURLからどの結果が取得できたかをわかるようにしてください。
-- `og:title`, `og:image` などの [[http://ogp.me/][Open Graph protocol]]に含まれるデータもあれば取得し、同様にJSONで返せるようにしてください。
-
-発展課題
-
-- 各ページへのHTTPリクエストのタイムアウトを設定し、長く時間のかかったURLは無視できるようにしましょう。正常に取得できた結果のみ返すようにします。
-- URLごとにページの取得を並列化しましょう。すべてのページの結果が揃ったら結果を返すようにしてみましょう。
-- `net/http/httptest` をつかってこの機能のテストを書いてみましょう。
 
 * 演習2 (30分): duを実装しなさい
 
