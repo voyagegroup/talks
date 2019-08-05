@@ -10,14 +10,14 @@ https://github.com/suzuken
 
 * この資料について
 
-VOYAGE GROUPの学生エンジニア向けインターンシップTreasureの2018年度版講義資料です。Goの講義は2日間です。
+VOYAGE GROUPの学生エンジニア向けインターンシップTreasureの2019年度版講義資料です。Goの講義は2日間です。
 
 .link https://voyagegroup.com/internship/treasure/
 
 GitHubで公開されています。
 
 .link https://github.com/voyagegroup/talks
-.link https://talks.godoc.org/github.com/voyagegroup/talks/2018/treasure-go/intro.slide
+.link https://talks.godoc.org/github.com/voyagegroup/talks/2019/treasure-go/intro.slide
 
 今年のGo講義は一日目がsuzuken、二日目はpei担当です。
 
@@ -151,7 +151,7 @@ n番目のフィボナッチ数を返す手続きを実装してください。
     === RUN   TestFib
     --- PASS: TestFib (0.00s)
     PASS
-    ok      github.com/voyagegroup/talks/2018/treasure-go/fib       0.006s
+    ok      github.com/voyagegroup/talks/2019/treasure-go/fib       0.006s
 
 
 * リファクタリング
@@ -164,7 +164,7 @@ n番目のフィボナッチ数を返す手続きを実装してください。
     === RUN   TestFib
     --- PASS: TestFib (0.00s)
     PASS
-    ok      github.com/voyagegroup/talks/2018/treasure-go/fib       0.006s
+    ok      github.com/voyagegroup/talks/2019/treasure-go/fib       0.006s
 
 リファクタリング前にはテストを書きましょう。
 
@@ -317,7 +317,7 @@ Goで `go run` させられるのは `main` パッケージのみ。
     $ curl -D - "http://localhost:8080?url=https://golang.org"
     HTTP/1.1 200 OK
     Content-Type: application/json
-    Date: Fri, 05 Aug 2018 07:45:23 GMT
+    Date: Fri, 05 Aug 2019 07:45:23 GMT
     Content-Length: 57
 
     {"title":"The Go Programming Language","description":""}
