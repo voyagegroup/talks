@@ -50,8 +50,8 @@ Enjoy! :)
 - Goの特徴
 - net/http
 - encoding/json
-- database/sql
 - APIサーバの作り方
+- database/sql
 
 .image https://golang.org/doc/gopher/project.png
 
