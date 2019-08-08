@@ -25,6 +25,17 @@ GitHubで公開されています。
 
 15:00からはフロントエンドの講義になるので、それまでに「API余裕っすよ」になる。
 
+* 講義の進め方
+
+講義っぽいことよりも、実際にこの資料を見ながら各々で進めてもらいます。
+基本課題は、タイミング見て解説していきます。
+
+* 今日やらないこと
+
+- 認証周り: 後日講義あります
+- フロント: 15時から講義があります
+- テーブル設計: 後日講義あります
+
 * バックエンドの環境構築
 
 README.md通りに進めると出来上がります。
@@ -32,7 +43,7 @@ README.md通りに進めると出来上がります。
 
 * ベースアプリの構成
 
-今日、主にいじる場所
+主にいじる場所
 
 - Controller: 外部からのHTTPリクエストの解釈、レスポンスの作成などをする
 - Service: アプリケーションのロジック
@@ -58,35 +69,80 @@ README.md通りに進めると出来上がります。
 Railsを参考にしました。
 命名などで悩まず、今日はガンガン書いてほしい意図で採用しているだけなので、基本的には自由です。
 
-- ルーティング
-.link https://railsguides.jp/routing.html
+.link https://railsguides.jp/routing.html ルーティング
 
-- アクティブレコード
-.link https://railsguides.jp/active_record_basics.html
+.link https://railsguides.jp/active_record_basics.html アクティブレコード
 
 * ステータスコードやルーティング規則の参考資料
 
-- MDN Web docs
-.link https://developer.mozilla.org/ja/docs/Web/HTTP/Status
+.link https://developer.mozilla.org/ja/docs/Web/HTTP/Status MDN Web docs
 
-- Web API: The Good Parts
-.link https://www.oreilly.co.jp/books/9784873116860/
+.link https://www.oreilly.co.jp/books/9784873116860/ Web API: The Good Parts
 
-- Github REST APIv3
-.link https://developer.github.com/v3/
+.link https://developer.github.com/v3/ Github REST APIv3
+
+.link https://qiita.com/mserizawa/items/b833e407d89abd21ee72#%E3%83%95%E3%82%A3%E3%83%AB%E3%82%BF%E3%82%BD%E3%83%BC%E3%83%88%E6%A4%9C%E7%B4%A2%E3%81%AF%E3%83%AA%E3%82%AF%E3%82%A8%E3%82%B9%E3%83%88%E3%83%91%E3%83%A9%E3%83%A1%E3%83%BC%E3%82%BF%E3%81%A7%E3%82%84%E3%82%8D%E3%81%86 翻訳: WebAPI 設計のベストプラクティス
 
 * Migrationの使い方
 
-なんか
+treasure-app/database/Makefileを参照
 
-* 開発に使えるTIPS
+make migrate/up を叩くと新しく追加されたSQLが実行されます。
 
-- jq
-- rebuild
-- status code (logging)
-- gorila
-- sqlx
-- http headerみるんや！
+.link https://github.com/pressly/goose
+
+*downは現場では使わない*
+
+upだけで運用しています。また、削除もしません。
+修正したいなら、新しくテーブル、カラムを追加して、新しく作ったものを使うようにすることがほとんどです。
+意図せず消してしまう可能性も当然あるので、downは無いほうがむしろ良い。
+
+* 開発に使えるTIPS: jq
+
+jsonを整形できます
+.link https://qiita.com/takeshinoda@github/items/2dec7a72930ec1f658af
+
+json以外の文字列が標準出力にある場合は、無視して整形も可能です。私は以下のようなaliasを設定しています。
+
+  alias jqr="jq -R 'fromjson?'"
+
+使用例
+
+  ❯ make -f integration.mk req-articles-post | jqr
+  {
+    "id": 16,
+    "title": "title",
+    "body": "body"
+  }
+
+* 開発に使えるTIPS: auto build
+
+treasure-app/backend
+コード書き変える度にbuildは手間なので、ツールにやってもらいましょう。
+
+  ❯ make dev-deps
+  ❯ make refresh-run
+
+
+* 開発に使えるTIPS: logを見れば大体何が起きているかわかる
+
+  ❯ make refresh-run
+  realize start
+  [15:37:48][BACKEND] : Watching 22 file/s 15 folder/s
+  [15:37:48][BACKEND] : Install started
+  [15:37:50][BACKEND] : Install completed in 2.170 s
+  [15:37:50][BACKEND] : Running..
+  [15:37:50][BACKEND] : 2019/08/10 15:37:50 server.go:51: Listening on port 1991
+  [15:38:01][BACKEND] : ::1 - - [10/Aug/2019:15:38:00 +0900] "POST /articles HTTP/1.1" 201 39
+
+* 開発に使えるTIPS: database editor
+
+JetBrainsのdatabase editorで簡単にデータベースの中身を操作できます。
+本番のデータベースに繋ぐのは禁止！
+
+.link https://pleiades.io/help/idea/database-tool-window.html
+
+.image ./img/mysql_viewer.png 400 500
 
 * リクエストしてみよう
 
@@ -96,25 +152,68 @@ Railsを参考にしました。
 - 記事取得 GET /articles/:id
 - 記事一覧取得 GET /articles
 
-ここに少しくらい何か書くお気持ちがある。
-特定のエンドポイントだけ追いかけようかな。うん。
+treasure-app/backendにあるintegration.mkにターゲットを用意しています。
+
+  ❯ make -f integration.mk req-articles-post
+
+
+* 少しだけ一緒にコードを追ってみましょう
+
+- 記事取得
+- エンドポイントの増やし方
+- カスタムハンドラ
+- ミドルウェア
+
+* 課題をやっていきましょう
+
+課題1については、隣に座っている人とペアプロでやってみましょう。
+わからない点があれば、TAや講師にガンガン質問してください。
+
+* 課題の進め方の例
+
+- 現状把握
+- テーブル、エンドポイントを設計
+- migration sqlを追加
+- migrate up
+- エンドポイント作成
+- ロジックを書く
+- 適宜curl投げてみたりする（integration.mkに追加してやりやすくするのもあり）
 
 * 課題1 記事の作成者
 
-* 記事の作成者
+* 要件
 
-記事を誰が書いたものか分かるようにしてみましょう。
+*出来るようにしてほしいこと*
 
-- user tableからユーザーの一意に特定できるものを探しましょう
-- article tableには、ユーザーの情報を入れるカラムは存在しません。マイグレーション追加する必要があります
-- MySQLの外部キー機能を使おう
-- 記事新規作成ハンドラ
-.link https://github.com/voyagegroup/treasure-app/blob/master/backend/server.go#L82
+- 記事投稿時に、記事とユーザーを紐付けて、誰の記事か分かるようにする
+- 記事の取得時にどのユーザーが書いたかを含めて返す（もし、ユーザーが紐付いてない場合は、nilを返す）
+
+*実装のポイント*
+
+- user tableからユーザーを一意に特定できるものキーを使います
+- article tableには、作成者を保持するカラムが存在しません
+
+* イメージ
+
+記事投稿時に、ユーザーを紐付ける。また、記事取得時はuser_idを返す。
+
+  $ curl -XPOST -H "Authorization: Bearer hoge" localhost:1991/articles 
+  -d '{"title": "title", "body": "body"}'
+
+  {"id":2,"title":"title","body":"body","user_id":1}
+
+  $ curl localhost:1991/articles
+
+  [
+    {"id":1,"title":"title","body":"body", "user_id": nil},
+    {"id":2,"title":"title","body":"body", "user_id": 1}
+  ]
 
 * この先に課題のヒントがあります。まずは自力でやってみましょう。
 
-* 記事の作成者 ヒント1
+* ヒント
 
+カラム追加と外部キー属性の作成
 treasure-app/database/migrations/3_add_user_column_to_article.sql
 
   -- +goose Up
@@ -123,6 +222,7 @@ treasure-app/database/migrations/3_add_user_column_to_article.sql
 
 
 migration up
+upするとデータベースに適用されます。
 
   ❯ pwd
   /Users/j-chikamori/go/src/github.com/voyagegroup/treasure-app/database
@@ -131,34 +231,26 @@ migration up
   2019/08/08 16:33:51 OK    3_add_user_column_to_article.sql
   2019/08/08 16:33:51 goose: no migrations to run. current version: 3
 
-* 記事の作成者 ヒント2
+* ヒント
 
+treasure-app/backend/middleware/auth.go
+ユーザーの情報はauth時にcontext valueに格納しています。
 
-Article struct にUserIDを追加
+* ヒント
 
-  package model
+Article structの作成例
+treasure-app/backend/model/article.go
 
   type Article struct {
-    ID     int64  `db:"id" json:"id"`
-    Title  string `db:"title" json:"title"`
-    Body   string `db:"body" json:"body"`
-    UserID *int64 `db:"user_id" json:"user_id"`
+    ID     int64  `db:"id"`
+    Title  string `db:"title"`
+    Body   string `db:"body"`
+    UserID *int64 `db:"user_id"`
   }
 
-User struct にIDを追加
+※レスポンス、リクエスト、テーブルのstructを分けると、後々幸せになれるかも？
 
-  package model
-
-  type User struct {
-    ID          int64  `db:"id"`
-    FirebaseUID string `db:"firebase_uid"`
-    DisplayName string `db:"display_name"`
-    Email       string `db:"email"`
-    PhotoURL    string `db:"photo_url"`
-  }
-
-
-* 記事の作成者 ヒント3
+* ヒント
 
 controllerのCreateで使っているrepository.Createを調整しよう
 
@@ -180,56 +272,223 @@ controllerのCreateで使っているrepository.Createを調整しよう
     return http.StatusCreated, newArticle, nil
   }
 
-* 課題2 記事へのコメント
+* 課題2 記事へのコメント機能
 
-もう少し書く
+* 要件
 
-- 誰が書いたか分かるようにしたい
+*出来るようにしてほしいこと*
+
+- 投稿されている記事に対して、コメントを投稿出来るようにする
+- GET /articles/:id のレスポンスに、コメント情報も返すようにする
+- コメントは自分のだけ更新、削除出来る
+
+*実装のポイント*
+
+- 記事に複数のコメントが投稿できるテーブル設計をしましょう
+- コメントの情報を保持するテーブルを作成する必要があります
+- エンドポイントのURLをどうすると直感的か考えてみよう
+
+* イメージ
+
+いい感じのエンドポイント設計をして、いい感じのJSONを投げる。そして作成されたJSONの情報を返ってくるようにする
+
+  curl -XPOST -H "Authorization: Bearer hoge" localhost:1991/iikanzini -d '{iikanzino json}'
+  {"id":6,"user_id":1,"article_id":1,"body":":commentbody"}
+
+  curl -v localhost:1991/articles/1
+  {
+    "id":1,"title":"title","body":"body","user_id":1,
+    "comments":{"id":6,"user_id":1,"article_id":1,"body":"commentbody"}
+  }
+
+* この先に課題のヒントがあります。まずは自力でやってみましょう
+
+* ヒント
+
+記事コメントテーブル作成
+treasure-app/database/migrations/4_add_table_article_comment.sql
+
+  -- +goose Up
+  CREATE TABLE article_comment (
+    id int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    user_id int(10) UNSIGNED NOT NULL,
+    article_id int(10) UNSIGNED NOT NULL,
+    body VARCHAR(255),
+    ctime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    utime TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    CONSTRAINT comment_fk_user FOREIGN KEY (user_id) REFERENCES user (id),
+    CONSTRAINT comment_fk_article FOREIGN KEY (article_id) REFERENCES article (id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+* ヒント
+
+コメント投稿のURLの例。
+では、更新、削除なら？を考えてみましょう。
+
+POST /articles/:article_id/comments
 
 * 課題3 記事のタグ付
 
-もう少し書く
+* 要件
 
-- カテゴリテーブルほしい
-- 複数のカテゴリ、カテゴリから記事検索
-- 記事の詳細取得時にコメントも出す
+*出来るようにしてほしいこと*
+
+- 記事に複数のタグが紐づく、タグは複数の記事に紐づく
+- タグに紐づく記事を検索出来るようにしたい
+- タグはいくつか適当作っておくか、タグを作るためのエンドポイントを用意してください
+
+*実装のポイント*
+
+- 記事に複数のタグが紐づく、かつ、タグを一覧できるテーブルが必要です
+- 一度に複数回のINSERTが発生することがあるため、一度でも失敗したら、全ての処理が実行されないようにしてください
+
+* イメージ
+
+フロントエンドを想像しながら、どういうエンドポイントを作れば良さそうか考えてみましょう。
+
+* この先に課題のヒントがあります。まずは自力でやってみましょう
+
+* ヒント
+
+タグ、記事とタグを関連付けるテーブルを作成する。
+treasure-app/database/migrations/5_add_table_tag.sql
+
+  -- +goose Up
+  CREATE TABLE tag (
+    id int(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+    name VARCHAR(255),
+    ctime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+treasure-app/database/migrations/6_add_table_article_tag.sql
+
+  -- +goose Up
+  CREATE TABLE article_tag (
+    article_id int(10) UNSIGNED NOT NULL,
+    tag_id int(10) UNSIGNED NOT NULL,
+    ctime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (article_id, tag_id),
+    CONSTRAINT article_tag_fk_article FOREIGN KEY (article_id) REFERENCES article (id),
+    CONSTRAINT article_tag_fk_tag FOREIGN KEY (tag_id) REFERENCES tag (id)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+* ヒント
+
+リクエスト、レスポンス、テーブルのstructを分けてもいいかもしれない。
+
+  type CreateArticleRequest struct {
+    Title  string  `json:"title"`
+    Body   string  `json:"body"`
+    TagIDs []int64 `json:"tag_ids"`
+  }
+
+  type CreateArticleResponse struct {
+    ID     int64  `json:"id"`
+    Title  string `json:"title"`
+    Body   string `json:"body"`
+    UserID int64  `json:"user_id"`
+    Tags   []Tag  `json:"tags"`
+  }
+
+  type Article struct {
+    ID     int64  `db:"id"`
+    Title  string `db:"title"`
+    Body   string `db:"body"`
+    UserID int64  `db:"user_id"`
+  }
+
+* ヒント
+
+repositoryの実装はあくまでシンプルに保ち、ロジックはサービスに寄せる。
+
+  func (a *Article) Create(newArticle *model.Article, tagIds []int64) (int64, error) {
+    var createdId int64
+    if err := dbutil.TXHandler(a.db, func(tx *sqlx.Tx) error {
+      result, err := repository.CreateArticle(tx, newArticle)
+      if err != nil {
+        return err
+      }
+      createdId, err := result.LastInsertId()
+      if err != nil {
+        return err
+      }
+      for _, tagId := range tagIds {
+        _, err = repository.CreateArticleTag(tx, createdId, tagId)
+        if err != nil {
+          return err
+        }
+      }
+      if err := tx.Commit(); err != nil {
+        return err
+      }
+      return err
+    }); err != nil {
+
+* ヒント
+
+CreateArticleTagはこんな実装です。
+
+  func CreateArticleTag(db *sqlx.Tx, articleId int64, tagId int64) (sql.Result, error) {
+    stmt, err := db.Prepare(`
+  INSERT INTO article_tag (article_id, tag_id) VALUES (?, ?)
+  `)
+    if err != nil {
+      return nil, err
+    }
+    defer stmt.Close()
+    return stmt.Exec(articleId, tagId)
+  }
 
 * 基礎課題まとめ
 
-できるようになったこと。
+* API余裕っすになりました（？）
 
-課題1
+課題1 記事の作成者機能
 
 - 既に存在しているテーブルにカラムを追加
 - 外部キー
 - 既存のエンドポイントの修正
 - マイグレーション
 
-課題2
+課題2 記事へのコメント機能
 
 - エンドポイントの新規作成
 - 1:N テーブル設計
 
-課題3
+課題3 記事のタグ付け
 
 - N:Nのテーブル設計（中間テーブル）
+- 複数テーブルへの書き込み
+
+* その他色々
+
+- エラー発生時に、ログとして残しておきたいメッセージとクライアントに返す時は同じで良いか？（内部のエラーメッセージ見えてよいのか？とか）
+- テーブルの表現に使ってるstructを使い回すと事故る可能性がある（機微情報）
+- エラーの設計、関数内で複数回発生するエラーどうするか
+- エンドポイント、ステータスコード設計
 
 * 発展課題1 記事一覧取得の機能拡充
-
-* 記事一覧取得の機能拡充
 
 - 作成、更新日時順
 - 記事内文字列検索
 - カテゴリ検索
 
+実装する際に、以下の記事が参考になるので、読んでみてください。
+
+.link https://qiita.com/mserizawa/items/b833e407d89abd21ee72#%E3%83%95%E3%82%A3%E3%83%AB%E3%82%BF%E3%82%BD%E3%83%BC%E3%83%88%E6%A4%9C%E7%B4%A2%E3%81%AF%E3%83%AA%E3%82%AF%E3%82%A8%E3%82%B9%E3%83%88%E3%83%91%E3%83%A9%E3%83%A1%E3%83%BC%E3%82%BF%E3%81%A7%E3%82%84%E3%82%8D%E3%81%86 クエリパラメータの設計について
+
 * 発展課題2 ファイルアップロード
 
-* ファイルアップロード
+後半開発で使いそうなので、余裕があれば、以下の記事を参考に実装してみましょう。
 
-- ioパッケージ周り
+.link https://tutorialedge.net/golang/go-file-upload-tutorial/
 
-* 発展課題3 共同編集者機能
+* 発展課題色々
 
-* 共同編集者機能
-
-- 権限管理を考えよう
+- 共同編集者機能
+- いいね機能
+- view数
+- auth時に毎回データベースに問い合わせている部分をKVSに置き換える
