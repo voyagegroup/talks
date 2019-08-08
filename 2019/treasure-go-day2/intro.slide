@@ -1,0 +1,235 @@
+Go Webアプリケーション入門
+Treasure2019版 Day2
+00:00 13 Aug 2019
+Tags: golang
+
+Jumpei Chikamori
+Gopher at VOYAGE GROUP
+@pei0804
+https://github.com/pei0804
+
+* この資料について
+
+VOYAGE GROUPの学生エンジニア向けインターンシップTreasureの2019年度版講義資料です。Goの講義は2日間です。
+
+.link https://voyagegroup.com/internship/treasure/
+
+GitHubで公開されています。
+
+.link https://github.com/voyagegroup/talks
+.link https://talks.godoc.org/github.com/voyagegroup/talks/2019/treasure-go-day2/intro.slide
+
+今年のGo講義は一日目がsuzuken、二日目はpei担当です。
+
+* 今日のゴール
+
+15:00からはフロントエンドの講義になるので、それまでに「API余裕っすよ」になる。
+
+* バックエンドの環境構築
+
+README.md通りに進めると出来上がります。
+.link https://github.com/voyagegroup/treasure-app/tree/master/backend
+
+* ベースアプリの構成
+
+今日、主にいじる場所
+
+- Controller: 外部からのHTTPリクエストの解釈、レスポンスの作成などをする
+- Service: アプリケーションのロジック
+- Repository: データベースへのアクセス
+- Model: 型定義(データベースのテーブルを型定義など)
+- server.go: サーバーの振る舞い
+- handler.go: カスタムハンドラー
+
+* ベースアプリの構成
+
+- cmd: コマンド
+- db: データベースとのコネクションなどを扱う
+- dbutil: データベースとのやり取りで使う便利関数置き場
+- firebase: Firebaseに関する何か
+- img: 画像置き場
+- httputil: HTTP周りの便利関数置き場
+- middleware: ミドルウェア置き場
+- sample サンプルです
+- .env サーバーの設定ファイル
+
+* 命名規則
+
+Railsを参考にしました。
+命名などで悩まず、今日はガンガン書いてほしい意図で採用しているだけなので、基本的には自由です。
+
+- ルーティング
+.link https://railsguides.jp/routing.html
+
+- アクティブレコード
+.link https://railsguides.jp/active_record_basics.html
+
+* ステータスコードやルーティング規則の参考資料
+
+- MDN Web docs
+.link https://developer.mozilla.org/ja/docs/Web/HTTP/Status
+
+- Web API: The Good Parts
+.link https://www.oreilly.co.jp/books/9784873116860/
+
+- Github REST APIv3
+.link https://developer.github.com/v3/
+
+* Migrationの使い方
+
+なんか
+
+* 開発に使えるTIPS
+
+- jq
+- rebuild
+- status code (logging)
+- gorila
+- sqlx
+- http headerみるんや！
+
+* リクエストしてみよう
+
+- 記事作成 POST /articles
+- 記事更新 PUT /articles/:id
+- 記事削除 DELETE /articles/:id
+- 記事取得 GET /articles/:id
+- 記事一覧取得 GET /articles
+
+ここに少しくらい何か書くお気持ちがある。
+特定のエンドポイントだけ追いかけようかな。うん。
+
+* 課題1 記事の作成者
+
+* 記事の作成者
+
+記事を誰が書いたものか分かるようにしてみましょう。
+
+- user tableからユーザーの一意に特定できるものを探しましょう
+- article tableには、ユーザーの情報を入れるカラムは存在しません。マイグレーション追加する必要があります
+- MySQLの外部キー機能を使おう
+- 記事新規作成ハンドラ
+.link https://github.com/voyagegroup/treasure-app/blob/master/backend/server.go#L82
+
+* この先に課題のヒントがあります。まずは自力でやってみましょう。
+
+* 記事の作成者 ヒント1
+
+treasure-app/database/migrations/3_add_user_column_to_article.sql
+
+  -- +goose Up
+  ALTER TABLE article ADD user_id int(10) UNSIGNED DEFAULT NULL;
+  ALTER TABLE article ADD CONSTRAINT article_fk_user FOREIGN KEY (user_id) REFERENCES user(id);
+
+
+migration up
+
+  ❯ pwd
+  /Users/j-chikamori/go/src/github.com/voyagegroup/treasure-app/database
+  ❯ make migrate/up
+  goose -dir migrations mysql "root:password@tcp(127.0.0.1:3306)/treasure_app" up
+  2019/08/08 16:33:51 OK    3_add_user_column_to_article.sql
+  2019/08/08 16:33:51 goose: no migrations to run. current version: 3
+
+* 記事の作成者 ヒント2
+
+
+Article struct にUserIDを追加
+
+  package model
+
+  type Article struct {
+    ID     int64  `db:"id" json:"id"`
+    Title  string `db:"title" json:"title"`
+    Body   string `db:"body" json:"body"`
+    UserID *int64 `db:"user_id" json:"user_id"`
+  }
+
+User struct にIDを追加
+
+  package model
+
+  type User struct {
+    ID          int64  `db:"id"`
+    FirebaseUID string `db:"firebase_uid"`
+    DisplayName string `db:"display_name"`
+    Email       string `db:"email"`
+    PhotoURL    string `db:"photo_url"`
+  }
+
+
+* 記事の作成者 ヒント3
+
+controllerのCreateで使っているrepository.Createを調整しよう
+
+  package controller
+
+  func (a *Article) Create(w http.ResponseWriter, r *http.Request) (int, interface{}, error) {
+    newArticle := &model.Article{}
+    if err := json.NewDecoder(r.Body).Decode(&newArticle); err != nil {
+      return http.StatusBadRequest, nil, err
+    }
+
+    articleService := service.NewArticleService(a.dbx)
+    id, err := articleService.Create(newArticle)
+    if err != nil {
+      return http.StatusInternalServerError, nil, err
+    }
+    newArticle.ID = id
+
+    return http.StatusCreated, newArticle, nil
+  }
+
+* 課題2 記事へのコメント
+
+もう少し書く
+
+- 誰が書いたか分かるようにしたい
+
+* 課題3 記事のタグ付
+
+もう少し書く
+
+- カテゴリテーブルほしい
+- 複数のカテゴリ、カテゴリから記事検索
+- 記事の詳細取得時にコメントも出す
+
+* 基礎課題まとめ
+
+できるようになったこと。
+
+課題1
+
+- 既に存在しているテーブルにカラムを追加
+- 外部キー
+- 既存のエンドポイントの修正
+- マイグレーション
+
+課題2
+
+- エンドポイントの新規作成
+- 1:N テーブル設計
+
+課題3
+
+- N:Nのテーブル設計（中間テーブル）
+
+* 発展課題1 記事一覧取得の機能拡充
+
+* 記事一覧取得の機能拡充
+
+- 作成、更新日時順
+- 記事内文字列検索
+- カテゴリ検索
+
+* 発展課題2 ファイルアップロード
+
+* ファイルアップロード
+
+- ioパッケージ周り
+
+* 発展課題3 共同編集者機能
+
+* 共同編集者機能
+
+- 権限管理を考えよう
