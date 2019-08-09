@@ -1,0 +1,270 @@
+Go入門
+Treasure2019版
+00:00 12 Aug 2019
+Tags: golang
+
+Kenta SUZUKI
+Gopher at VOYAGE GROUP
+@suzu_v
+https://github.com/suzuken
+
+* この資料について
+
+VOYAGE GROUPの学生エンジニア向けインターンシップTreasureの2019年度版講義資料です。Goの講義は2日間です。
+
+.link https://voyagegroup.com/internship/treasure/
+
+GitHubで公開されています。
+
+.link https://github.com/voyagegroup/talks
+.link https://talks.godoc.org/github.com/voyagegroup/talks/2019/treasure-go/intro.slide
+
+今年のGo講義は一日目がsuzuken、二日目はpei担当です。
+
+* はじめに
+
+* となりの人と話しましょう 1分
+
+- 好きな言語
+- 好きなエディタ
+- 最近つくってるもの
+
+* Treasureについて簡単に
+
+- バックグラウンドの違うみなさんが3週間過ごします
+- どんどん話してください
+- コードを書いて、質問して、がっつり勉強してください
+
+Enjoy! :)
+
+* 2日間で学んでほしいこと
+
+- Goで小さなコマンドラインツールを書けるようになること
+- 一通り小さなWebアプリケーションを書けるようになること
+- Goのコードの書き方に慣れること
+
+とにかくどんどんコードを書きましょう。
+
+* アウトライン
+
+- Goの特徴
+- net/http
+- encoding/json
+- APIサーバの作り方
+- database/sql
+
+.image https://golang.org/doc/gopher/project.png
+
+* なぜGoを使うのか？
+
+いろいろな良い点があります。
+
+- シンプルさ
+- 読みやすい
+- 言語仕様がfixしている
+- 軽快なbuild / 高速な動作 / concurrencyサポート
+- ツール (go tool, gofmt ...)
+- ほどよい標準ライブラリ
+
+* net/http 入門
+
+* net/http: Request OverView
+
+.code http/example.go /START OMIT/,/END OMIT/
+
+.link https://golang.org/pkg/net/http/
+.link https://developer.mozilla.org/ja/docs/Web/HTTP/Overview
+
+* net/http 実習(30分): curl実装
+
+以下を実装してみましょう。
+
+    $ curl example.com
+
+正常系については同等に、エラーの場合については適宜わかりやすいメッセージを出力するようにしてください。
+
+できたらHTTPヘッダーの変更、メソッドの変更もやってみましょう。
+
+    $ curl --header "X-Treasure: 🍺" example.com
+    $ curl -H "Content-Type: application/json" -X POST -d '{"ajito":"🍺"}' example.com
+
+全部できたら好きなcurlのオプションを実装してみましょう。 (例: `--cookie`, `--cookie-jar`, `--user-agent` etc.)
+
+*発展課題1*: このコマンドのテストを書いてみましょう。（ポイント: コマンドラインツールとしてのテストと内部APIのテストを分けて考えましょう。）
+*発展課題2*: このコマンドからのリクエストをデバッグしやすくするHTTPサーバを自分で実装してみましょう。
+
+* 事前課題その2: net/http 演習（振り返り）
+
+- 指定したURLにあるコンテンツについて、タイトルとdescriptionを抜き出すツールを書きましょう
+- HTTPサーバとして実装してこの機能をつかえるようにしましょう
+
+.link https://gist.github.com/suzuken/b456e0f4679f86da572839d6d86f159e
+
+    $ go run scraper/scraper.go&
+    # 自分でつくったcurlを使ってももちろんOK
+    $ curl -D - "http://localhost:8080?url=https://golang.org"
+    HTTP/1.1 200 OK
+    Content-Type: application/json
+    Date: Fri, 05 Aug 2019 07:45:23 GMT
+    Content-Length: 57
+
+    {"title":"The Go Programming Language","description":""}
+
+この課題の狙いは、ある仕事をHTTPサーバに組み込むことを試してもらうことです。適切に仕事をわけて実装すれば、楽に組み込むことができます。
+
+* net/http.(*Server)
+
+Goの標準ライブラリでは簡単にHTTPサーバを立ち上げることができます。
+
+    func main() {
+    	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+    		// wはio.Writerなので書き込むことができます
+    		fmt.Fprint(w, "hello world")
+    	})
+    	http.ListenAndServe(":8080", nil)
+    }
+
+and
+
+    $ go run server.go&
+    $ curl http://localhost:8080
+    hello world
+
+.link https://golang.org/pkg/fmt/#Fprint
+.link https://golang.org/pkg/net/http/
+
+* encoding/json
+
+.code scraper/scraper.go /type Page/,/^}/
+
+and
+
+    enc := json.NewEncoder(w)
+    if err := enc.Encode(p); err != nil {
+        // ...
+    }
+
+すると io.Writer である `w` にJSONが出力されます。
+
+.link https://golang.org/pkg/encoding/json/
+
+* 実習 net/http: 複数のページ取得 45分
+
+事前課題その2でつくったHTTPサーバに以下の機能を追加しましょう。
+
+- URLを複数受け取り、複数ページのtitleとdescriptionを取ってこれるようにしましょう。パラメータの渡し方はお好みで。（カンマ区切りなど）
+- 結果はJSONの配列で返すようにしましょう。その際、どのURLからどの結果が取得できたかをわかるようにしてください。
+- `og:title`, `og:image` などの [[http://ogp.me/][Open Graph protocol]]に含まれるデータもあれば取得し、同様にJSONで返せるようにしてください。
+
+発展課題
+
+- 各ページへのHTTPリクエストのタイムアウトを設定し、長く時間のかかったURLは無視できるようにしましょう。正常に取得できた結果のみ返すようにします。
+- URLごとにページの取得を並列化しましょう。すべてのページの結果が揃ったら結果を返すようにしてみましょう。
+- [[https://golang.org/pkg/net/http/httptest/][net/http/httptest]] をつかってこの機能のテストを書いてみましょう。
+
+* Goとデータベース
+
+* Goとデータベース: database/sql
+
+Goからデータベースを扱うときは `database/sql` を使います。
+
+.link https://golang.org/pkg/database/sql/
+.link https://golang.org/s/sqlwiki
+.link https://golang.org/s/sqldrivers
+
+MySQLでの利用例は以下を見つつ説明します。
+
+.link https://github.com/go-sql-driver/mysql/wiki/Examples
+
+以下の資料もおすすめです。
+
+.link http://go-database-sql.org/
+
+* クエリするときの原則
+
+- クエリにパラメータを埋め込むときは必ずプリペアドステートメントを使いましょう。
+- 決して `fmt.Sprintf` などによる文字列結合でクエリを組み立ててはいけません。
+
+.link https://www.ipa.go.jp/files/000024396.pdf SQLインジェクション対策について
+.link http://www.ipa.go.jp/files/000017320.pdf 安全なSQLの呼び出し方
+.link http://d.hatena.ne.jp/ajiyoshi/20100409/1270809525
+
+Prepare, Query、どちらでもプリペアドステートメントが使えます。
+
+.link https://golang.org/pkg/database/sql/#DB.Prepare
+.link https://golang.org/pkg/database/sql/#DB.Query
+
+    db.Query(`select * from users where name = ?`, "s-tanno")
+
+* ここから先の実習はvoyagegroup/treasure-appの環境を使います
+
+.link https://github.com/voyagegroup/treasure-app
+
+今日は `./database` 以下をつかいます。
+
+* DBの立ち上げと接続
+
+  $ cd path/to/treasure-app
+  $ make docker-compose/up # or docker-compose up -d
+  $ docker-compose ps # DBコンテナが立ち上がっていることを確認
+  $ make mysql # mysql -u root -h --protocol -p
+  # パスワードをいれる
+  # mysqlシェルが立ち上がる
+
+演習用のデータを分離するため、`tutorial`データベースを作成します。
+
+  mysql> create database tutorial; # チュートリアル用のDB作成
+  mysql> use tutorial;
+
+Goから繋ぐ場合は次のようにしてつなげます。
+
+  db, err := sql.Open("root:password@tcp(127.0.0.1:3306)/tutorial")
+
+ちなみに root:password@tcp(127.0.0.1:3306)/tutorial はDSN（Database Source Name）です。
+
+* DB実習: 一通り自分でDB操作をしてみよう（40分）
+
+MySQLに自分用の日報を保存するコマンドラインアプリケーションをつくりましょう。
+
+- 日報用のテーブル `reports` を用意し、保存できるようにしてください。更新、削除の機能はお好みで。テーブル設計は自分で考えてみましょう。
+
+発展課題
+
+- いい感じに日報を整形して標準出力できるようなオプションをつけてみましょう。
+- 日報にタグを追加できるようにしてみましょう。タグによって日報を取得できるようにすると便利そうです。
+- Webアプリにしてみましょう。`type Report struct` に `ServeHTTP` を実装するのがおすすめです。
+
+.link https://golang.org/pkg/net/http/#Handler
+
+* データベースマイグレーション
+
+- 複数人でアプリケーションをつくるときにスキーマの管理どうしますか？
+- データベースマイグレーションをつかうと便利です
+
+.link https://github.com/pressly/goose
+
+たとえば新しいテーブルを追加するときやスキーマを変更するときには、SQLファイルを `migrations` 以下にコミットするといいです。すると機能とセットでDBスキーマの変更もコードで管理することができます。
+
+* DB実習
+
+wikiの記事につけたコメントをちゃんとDBに保存できるようにしてみましょう。
+
+テーブル例
+
+    CREATE TABLE `comments` (
+      `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+      `article_id` int(11) NOT NULL,
+      `body` TEXT NOT NULL,
+      `created` timestamp NOT NULL DEFAULT NOW(),
+      `updated` timestamp NOT NULL DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP,
+      PRIMARY KEY (`comment_id`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='list of comments';
+
+- データベースマイグレーションも用意してあるので、つかってみるといいでしょう
+- できれば外部キー制約も貼りましょう
+
+発展課題
+
+- コメントについて誰がコメントしたかも保存できるようにしましょう
+- コメントの編集削除をサポートしましょう
+- トップページに記事のコメント数も出すようにしましょう
