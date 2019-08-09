@@ -59,15 +59,12 @@ Enjoy! :)
 
 いろいろな良い点があります。
 
+- シンプルさ
 - 読みやすい
 - 言語仕様がfixしている
 - 軽快なbuild / 高速な動作 / concurrencyサポート
 - ツール (go tool, gofmt ...)
 - ほどよい標準ライブラリ
-
-Goの一番の特徴はSimplicityだと思います。
-
-.link https://talks.golang.org/2015/simplicity-is-complicated.slide#1 Simplicity is Complicated
 
 * net/http 入門
 
@@ -93,7 +90,8 @@ Goの一番の特徴はSimplicityだと思います。
 
 全部できたら好きなcurlのオプションを実装してみましょう。 (例: `--cookie`, `--cookie-jar`, `--user-agent` etc.)
 
-*発展課題*: このコマンドのテストを書いてみましょう。（ポイント: コマンドラインツールとしてのテストと内部APIのテストを分けて考えましょう。）
+*発展課題1*: このコマンドのテストを書いてみましょう。（ポイント: コマンドラインツールとしてのテストと内部APIのテストを分けて考えましょう。）
+*発展課題2*: このコマンドからのリクエストをデバッグしやすくするHTTPサーバを自分で実装してみましょう。
 
 * 事前課題その2: net/http 演習（振り返り）
 
@@ -198,7 +196,33 @@ Prepare, Query、どちらでもプリペアドステートメントが使えま
 
     db.Query(`select * from users where name = ?`, "s-tanno")
 
-* DB実習: 一通り自分でDB操作をしてみよう
+* ここから先の実習はvoyagegroup/treasure-appの環境を使います
+
+.link https://github.com/voyagegroup/treasure-app
+
+今日は `./database` 以下をつかいます。
+
+* DBの立ち上げと接続
+
+  $ cd path/to/treasure-app
+  $ make docker-compose/up # or docker-compose up -d
+  $ docker-compose ps # DBコンテナが立ち上がっていることを確認
+  $ make mysql # mysql -u root -h --protocol -p
+  # パスワードをいれる
+  # mysqlシェルが立ち上がる
+
+演習用のデータを分離するため、`tutorial`データベースを作成します。
+
+  mysql> create database tutorial; # チュートリアル用のDB作成
+  mysql> use tutorial;
+
+Goから繋ぐ場合は次のようにしてつなげます。
+
+  db, err := sql.Open("root:password@tcp(127.0.0.1:3306)/tutorial")
+
+ちなみに root:password@tcp(127.0.0.1:3306)/tutorial はDSN（Database Source Name）です。
+
+* DB実習: 一通り自分でDB操作をしてみよう（40分）
 
 MySQLに自分用の日報を保存するコマンドラインアプリケーションをつくりましょう。
 
@@ -237,20 +261,10 @@ wikiの記事につけたコメントをちゃんとDBに保存できるよう�
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='list of comments';
 
 - データベースマイグレーションも用意してあるので、つかってみるといいでしょう
+- できれば外部キー制約も貼りましょう
 
 発展課題
 
 - コメントについて誰がコメントしたかも保存できるようにしましょう
 - コメントの編集削除をサポートしましょう
 - トップページに記事のコメント数も出すようにしましょう
-
-* Tips: クエリ結果のstructへのbind
-
-reflectをつかってstructにbindする方法があります。たとえばsqlxです。
-
-.link https://github.com/jmoiron/sqlx
-
-またはコード生成をつかうのも良い選択でしょう。 `database/sql` のための `Scan` 用手続きをstructから生成すると便利です。
-
-.link https://blog.golang.org/generate
-.link https://github.com/variadico/scaneo
