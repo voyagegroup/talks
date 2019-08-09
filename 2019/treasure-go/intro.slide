@@ -76,8 +76,9 @@ Goの一番の特徴はSimplicityだと思います。
 .code http/example.go /START OMIT/,/END OMIT/
 
 .link https://golang.org/pkg/net/http/
+.link https://developer.mozilla.org/ja/docs/Web/HTTP/Overview
 
-* net/http 実習(40分): curl実装
+* net/http 実習(30分): curl実装
 
 以下を実装してみましょう。
 
@@ -94,15 +95,7 @@ Goの一番の特徴はSimplicityだと思います。
 
 *発展課題*: このコマンドのテストを書いてみましょう。（ポイント: コマンドラインツールとしてのテストと内部APIのテストを分けて考えましょう。）
 
-* 余談: SimpleとEasy
-
-.link http://php.net/file_get_contents
-.link http://eed3si9n.com/ja/simplicity-matters シンプルさの必要性
-.link https://www.amazon.co.jp/dp/4274064069 UNIXという考え方―その設計思想と哲学
-
-: シンプルさはあとから追加できない
-
-* 事前課題その2: net/http 演習
+* 事前課題その2: net/http 演習（振り返り）
 
 - 指定したURLにあるコンテンツについて、タイトルとdescriptionを抜き出すツールを書きましょう
 - HTTPサーバとして実装してこの機能をつかえるようにしましょう
