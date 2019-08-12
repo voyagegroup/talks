@@ -247,18 +247,18 @@ MySQLに自分用の日報を保存するコマンドラインアプリケーシ
 
 * DB実習
 
-wikiの記事につけたコメントをちゃんとDBに保存できるようにしてみましょう。
+日報につけたコメントをちゃんとDBに保存できるようにしてみましょう。
 
 テーブル例
 
-    CREATE TABLE `comments` (
-      `comment_id` int(11) NOT NULL AUTO_INCREMENT,
-      `article_id` int(11) NOT NULL,
-      `body` TEXT NOT NULL,
-      `created` timestamp NOT NULL DEFAULT NOW(),
-      `updated` timestamp NOT NULL DEFAULT NOW() ON UPDATE CURRENT_TIMESTAMP,
-      PRIMARY KEY (`comment_id`)
-    ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='list of comments';
+  CREATE TABLE `comments` (
+    `comment_id` int(11) NOT NULL AUTO_INCREMENT,
+    `report_id` int(11) NOT NULL,
+    `body` TEXT NOT NULL,
+    `created` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `updated` timestamp ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (`comment_id`)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='list of comments';
 
 - データベースマイグレーションも用意してあるので、つかってみるといいでしょう
 - できれば外部キー制約も貼りましょう
