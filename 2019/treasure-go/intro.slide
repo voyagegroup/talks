@@ -218,7 +218,7 @@ Prepare, Query、どちらでもプリペアドステートメントが使えま
 
 Goから繋ぐ場合は次のようにしてつなげます。
 
-  db, err := sql.Open("root:password@tcp(127.0.0.1:3306)/tutorial")
+  db, err := sql.Open("mysql", "root:password@tcp(127.0.0.1:3306)/tutorial")
 
 ちなみに root:password@tcp(127.0.0.1:3306)/tutorial はDSN（Database Source Name）です。
 
