@@ -1,6 +1,6 @@
-Go
-Treasure2021版 Day2
-Tags: golang
+Backend with Go
+Treasure2021版
+Tags: go
 
 Jumpei Chikamori
 Gopher at VOYAGE GROUP
@@ -9,49 +9,81 @@ https://github.com/pei0804
 
 * この資料について
 
-VOYAGE GROUPの学生エンジニア向けインターンシップTreasureの2021年度版講義資料です。Goの講義は2日間です。
-
-GitHubで公開されています。
+VOYAGE GROUPの学生エンジニア向けインターンシップTreasureの2021年度版講義資料です。
 
 .link https://github.com/voyagegroup/talks
 .link https://talks.godoc.org/github.com/voyagegroup/talks/2021/treasure-go/go.slide
 
 * はじめに
 
-* アイスブレイク 5分
+* アイスブレイク
 
-- 好きな言語
-- 好きなエディタ
-- 最近つくってるもの
+- 自己紹介。
+- 好きな言語。
+- 好きなエディタ。
+- 最近つくってるもの。
 
-* Treasureについて簡単に
+ブレイクアウトルームに分けます。
 
-- バックグラウンドの違うみなさんが3週間過ごします
-- どんどん話してください
-- コードを書いて、質問して、がっつり勉強してください
+* About Treasure
+
+- バックグラウンドの違うみなさんが3週間過ごします。
+- どんどん話してください。
+- コードを書いて、質問して、がっつり勉強してください。
 
 Enjoy! :)
 
-* 2日間で学んでほしいこと
+* バックエンド講義のゴール
 
-- Goで小さなコマンドラインツールを書けるようになること
-- 一通り小さなWebアプリケーションを書けるようになること
-- Goのコードの書き方に慣れること
+- 一通り小さなWebアプリケーションを書けるようになること。
+- Goのコードの書き方に慣れること。
 
 とにかくどんどんコードを書きましょう。
 
-* 講義のゴール
-
-一般的なWebアプリケーションに求められるスペックをGoで作れる。
-
 .image https://golang.org/doc/gopher/project.png
 
-* バックエンドの環境構築
+* 質問はガンガン投げてほしい
+
+仮に講義に関係ないものでも、後日回答していくので、何でも聞いていいぞ！
+Slackでも、口頭でも何でもおｋ。
+
+* 事前課題
+
+* 事前課題 1
 
 README.md通りに進めると出来上がります。
 .link https://github.com/VG-Tech-Dojo/treasure-app-2021
 
-* ベースアプリの構成
+環境構築出来ましたか？
+
+* 事前課題 2 記事削除
+
+PR見ていく。
+
+* 事前課題 3 記事更新
+
+PR見ていく。
+
+* Goどうだった？
+
+適当に聞いていく。
+
+* Goにした理由
+
+- 開発にほしいものが標準で揃ってる（fmt, mod, build, test）。
+- 書き方に大きな違いが発生しにくいので、レビューしやすい。
+
+* ベースアプリのアーキテクチャ
+
+それぞれの層ってどういう役割？を聞いてみる。
+
+- interface
+- usecase
+- domain
+- domain/repository
+- domain/model
+
+* ベースアプリのアーキテクチャ
 
 .image ./assets/arch.png 540 717
 
@@ -64,9 +96,49 @@ README.md通りに進めると出来上がります。
 - app/usecase 利用者の目的を達成する部分。例えば、記事を投稿する。
 - app/domain ビジネスロジック。
 - app/domain/repository 永続化層とのやり取り。
-- app/domain/model 永続層のモデル定義。
+- app/domain/model 型定義。
 
-他にもいくつかあるけど、ここでは割愛します。
+* Let's Go.
+
+* 課題 1
+
+- GET /articles でタイトル検索出来るようにしたい。
+
+クエリパラメータで検索文字列を受け取って、SQLでLIKEを使って検索しよう。
+
+.link https://pkg.go.dev/github.com/gorilla/mux#Vars mux.Vars
+
+* 課題の進め方
+
+* 作業ブランチを切ってPRを作る
+
+ブランチ名は何でもいいけど、課題毎に作業ブランチ切って、PRを作ってください。PR名は、課題1 名前とか。
+
+    git checkout -b name-kadai-1
+
+* API First
+
+API Firstで開発しよう。
+
+1. treasure-app-2021/swagger/swagger.yamlを編集する
+2. treasure-app-2021/backend/で make genする
+3. 必要に応じてendpointを生やす
+4. ロジックを作る
+
+後半の開発も、まずはAPIを決めて、APIでコミュニケーションを取っていきましょう。
+
+.link https://developer.ntt.com/ja/blog/58aa2ca4-ef7c-4f50-86b6-b5758df58de6 APIファーストで開発するメリットとは？
+.link https://stoplight.io/studio/ Stoplight Studioを使うのがおすすめ
+
+* REST API 参考資料
+
+.link https://developer.mozilla.org/ja/docs/Web/HTTP/Status MDN Web docs
+
+.link https://www.oreilly.co.jp/books/9784873116860/ Web API: The Good Parts
+
+.link https://developer.github.com/v3/ Github REST APIv3
+
+.link https://qiita.com/mserizawa/items/b833e407d89abd21ee72#%E3%83%95%E3%82%A3%E3%83%AB%E3%82%BF%E3%82%BD%E3%83%BC%E3%83%88%E6%A4%9C%E7%B4%A2%E3%81%AF%E3%83%AA%E3%82%AF%E3%82%A8%E3%82%B9%E3%83%88%E3%83%91%E3%83%A9%E3%83%A1%E3%83%BC%E3%82%BF%E3%81%A7%E3%82%84%E3%82%8D%E3%81%86 翻訳: WebAPI 設計のベストプラクティス
 
 * 命名規則
 
@@ -77,137 +149,43 @@ Railsを参考にしました。
 
 .link https://railsguides.jp/active_record_basics.html アクティブレコード
 
-* ステータスコードやルーティング規則の参考資料
+* レビュー
 
-.link https://developer.mozilla.org/ja/docs/Web/HTTP/Status MDN Web docs
+適当にPR見ていく。
 
-.link https://www.oreilly.co.jp/books/9784873116860/ Web API: The Good Parts
+* コラム: Swaggerとは
 
-.link https://developer.github.com/v3/ Github REST APIv3
+.link https://swagger.io/ Swagger
 
-.link https://qiita.com/mserizawa/items/b833e407d89abd21ee72#%E3%83%95%E3%82%A3%E3%83%AB%E3%82%BF%E3%82%BD%E3%83%BC%E3%83%88%E6%A4%9C%E7%B4%A2%E3%81%AF%E3%83%AA%E3%82%AF%E3%82%A8%E3%82%B9%E3%83%88%E3%83%91%E3%83%A9%E3%83%A1%E3%83%BC%E3%82%BF%E3%81%A7%E3%82%84%E3%82%8D%E3%81%86 翻訳: WebAPI 設計のベストプラクティス
+APIのドキュメント化に使えるツール。今回はSwagger2を使っている。
+ちなみに、OpenAPI3とSwagger2は別物になる。元々はSwaggerフレームワークの一部だったけど、色々あったらしい。
 
-* Migrationの使い方
+なぜ、OpenAPI3ではなく、Swagger2を採用したか？
+それは、関連するツールがSwagger2には対応してるけど、OpenAPI3には対応してないパターンが多いから。
+私も過去に、Swagger2系のOSSを作っていたので分かるけど、Swagger2とOpenAPI3に全然互換性がなくて、追従出来なくてやる気を失ったことがある。使い込まれてるツールほど、後から出てきたOpenAPIに追従出来ていない現状がある。
 
-* チュートリアル
+.link https://ackintosh.github.io/blog/2018/05/12/openapi-generator/ OpenAPI Generator - community drivenで成長するコードジェネレータ
+.link https://swagger.io/blog/api-strategy/difference-between-swagger-and-openapi/ What Is the Difference Between Swagger and OpenAPI?
 
-* API First
-
-API Firstで開発しよう。
-
-.link https://developer.ntt.com/ja/blog/58aa2ca4-ef7c-4f50-86b6-b5758df58de6 APIファーストで開発するメリットとは？
-
-1. treasure-app-2021/swagger/swagger.yamlを編集する
-2. treasure-app-2021/backend/で make genする
-3. endpoint生やす
-4. ロジックを作る
-
-* Swaggerを編集しよう
-
-.link https://stoplight.io/studio/ Stoplight Studio
-
-Models -> New Model -> HelloWorld で適当なモデルを作る
-Paths -> New Path -> GET /helloworld でエンドポイント作成。
-GET /helloworldの200のResponseに先程作ったHelloWorldモデルを使う。
-
-* 作成例
-
-.image ./assets/endpoint.png 558 602
-
-* コードジェネレート
-
-  ❯ cd backend && make gen
-  ❯ git status
-
-ファイルが新しく生成されているので、コードを見てみよう。
-
-* HelloWorld Model
-
-    // Code generated by go-swagger; DO NOT EDIT.
-
-    package generated_swagger
-
-    // This file was generated by the swagger tool.
-    // Editing this file might prove futile when you re-run the swagger generate command
-
-    import (
-        "context"
-
-        "github.com/go-openapi/strfmt"
-        "github.com/go-openapi/swag"
-    )
-
-    // HelloWorld Hello
-    //
-    // swagger:model HelloWorld
-    type HelloWorld struct {
-
-        // message
-        Message string `json:"message,omitempty"`
-    }
-    ...
-
-* http request
-
-    ❯ curl -v localhost:1991/helloworld
-    *   Trying ::1...
-    * TCP_NODELAY set
-    * Connected to localhost (::1) port 1991 (#0)
-    > GET /helloworld HTTP/1.1
-    > Host: localhost:1991
-    > User-Agent: curl/7.64.1
-    > Accept: */*
-    >
-    < HTTP/1.1 200 OK
-    < Date: Thu, 20 May 2021 07:42:27 GMT
-    < Content-Length: 17
-    < Content-Type: text/plain; charset=utf-8
-    <
-    * Connection #0 to host localhost left intact
-    {"message":"Hey"}* Closing connection 0
-
-/pingの実装を真似して、さくっとJSONレスポンスを返してみよう。
-
-* 実装例
-
-app/interfaces/api/server.go
-
-    r.Methods(http.MethodGet).Path("/helloworld").
-        HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-        w.WriteHeader(http.StatusOK)
-        helloworld := generated_swagger.HelloWorld{
-            Message: "Hey",
-        }
-        res, err := helloworld.MarshalBinary()
-        if err != nil {
-            http.Error(w, err.Error(), http.StatusInternalServerError)
-            return
-        }
-        w.Header().Set("Content-Type", "application/json")
-        w.Write(res)
-    })
-
-* 課題
-
-* 記事詳細でユーザーの情報も返したい
-
-要件
+* 課題 2
 
 - GET /articles/{article_id} で記事詳細を取ってきた時に、作成者の情報も返したい。
 
-* 私ならこう作る
+* 作業ブランチを切ってPRを作る
 
-* API
+    git checkout -b name-kadai-2
 
-TODO
+* レビュー
 
-* 実装
+適当にPR見ていく。
 
-TODO
+* コラム: アーキテクチャをどのように考えるか
 
-* 記事へのコメント機能
+なんか書く。
 
-作成された記事へのコメントをする機能を作ってみましょう。
+* 課題 3
+
+- 記事へコメント。API設計も含めてやる。
 
 要件
 
@@ -215,7 +193,9 @@ TODO
 - 誰がコメントしたか分かる
 - コメントはコメント作成者のみ削除できる。
 
-* APIを考えよう
+* ディスカッションしてみよう
+
+ブレイクアウトルームへ分かれます。
 
 - エンドポイントのパスは？
 - HTTPメソッドは何が望ましい？
@@ -223,51 +203,74 @@ TODO
 - Response Body
 - HTTP Status Code
 
-* 作るもの
+終わったら、何人か当てて、どんなAPIにするか聞いてみる。
 
-- model コメントの型定義
-- repository コメントのインサート。
-- usecase コメント投稿する。
-- handler コメント投稿のhttpリクエストを受け取る。
-- server.go　コメント投稿ハンドラとエンドポイントを紐付ける。
-- SQL 記事へのコメント用のCREATE TABLE SQL
-- etc...
+* 作業ブランチを切ってPRを作る
 
-* 私ならこう作る
+    git checkout -b name-kadai-3
 
-* API
+* レビュー
 
-TODO
+適当にPR見ていく。
 
-* 実装
+* コラム: どこでバリデーションするか？
 
-TODO
+test
 
-* N+1問題を解決
+* 課題 4
 
-記事投稿時のタグ付けが出来るが、このタグ付けのクエリは、N+1問題を抱えている。
+プロフィール情報が取得できるエンドポイント。API設計も含めてやる。
+
+* ディスカッションしてみよう
+
+ブレイクアウトルームへ分かれます。
+
+- エンドポイントのパスは？
+- HTTPメソッドは何が望ましい？
+- Request Body
+- Response Body
+- HTTP Status Code
+
+* 作業ブランチを切ってPRを作る
+
+    git checkout -b name-kadai-4
+
+* レビュー
+
+適当にPR見ていく。
+
+* 課題5
+
+記事にタグ付けする。
 
 要件
 
-- N+1を解消してください。
+- タグは作成できる。
+- 記事投稿時にタグをつけれる。
+- 記事更新時にタグを更新できる。
 
-* 私ならこう作る
+* ディスカッションしてみよう
 
-* API
+ブレイクアウトルームへ分かれます。
 
-TODO
+- エンドポイントのパスは？
+- HTTPメソッドは何が望ましい？
+- Request Body
+- Response Body
+- HTTP Status Code
 
-* 実装
+* 作業ブランチを切ってPRを作る
 
-TODO
+    git checkout -b name-kadai-5
+
+* まとめ
+
+* フルサイクル開発するということ
+
+わたしと組織の話。
 
 * Beyond the twelve factor app
 
-興味あれば、読んでみよう。きっと、今ならわかるはず。
+こういうこと意識するんじゃよっていう話
 
 .link https://tanzu.vmware.com/content/blog/beyond-the-twelve-factor-app Beyond the twelve factor app
-
-* 追加課題
-
-- N+1
-- GraphQL
