@@ -112,7 +112,7 @@ API Firstで開発しよう。
 3. 必要に応じてendpointを生やす
 4. ロジックを作る
 
-後半の開発も、まずはAPIを決めて、APIでコミュニケーションを取っていきましょう。
+後半の開発も、まずはAPIから決めましょう。
 
 .link https://developer.ntt.com/ja/blog/58aa2ca4-ef7c-4f50-86b6-b5758df58de6 APIファーストで開発するメリットとは？
 .link https://stoplight.io/studio/ Stoplight Studioを使うのがおすすめ
@@ -176,10 +176,11 @@ DDDもクリーンアーキテクチャも特に採用していません。
 
 * 課題 3
 
-- 記事へコメント。API設計も含めてやる。
+- 記事へコメント。
 
 要件
 
+- APIも考える
 - 記事へコメントが出来る。
 - 誰がコメントしたか分かる
 - コメントはコメント作成者のみ削除できる。
@@ -210,9 +211,17 @@ DDDもクリーンアーキテクチャも特に採用していません。
 - そもそもパラメーターが期待しているものと違う？
 - 自分以外のコメントを削除しようとしたら？
 
+適当に当てて聞く。
+
 * 課題 4
 
 プロフィール情報が取得できるエンドポイント。API設計も含めてやる。
+
+要件
+
+- APIも考える。
+- どんな情報返したいかは考える。
+- 余力があれば、マイページ的な情報を返すには？も考える。
 
 * ディスカッションしてみよう
 
@@ -253,7 +262,8 @@ DDDもクリーンアーキテクチャも特に採用していません。
 
 要件
 
-- タグは作成できる。
+- APIも考える。
+- タグを作成できる。
 - 記事投稿時にタグをつけれる。
 - 記事更新時にタグを更新できる。
 
@@ -271,14 +281,28 @@ DDDもクリーンアーキテクチャも特に採用していません。
 
     git checkout -b name-kadai-5
 
+* レビュー
+
+適当にPR見ていく。
+
 * まとめ
 
 * フルサイクル開発するということ
 
-わたしと組織の話。
+VOYAGE GROUPでは、フルサイクル開発が一般的です。
+フルサイクルとは、フルスタックとは違います。フルサイクルの責任範囲はサービス全体に渡ります。つまり、サービスに必要なことを全部やっていると、必然的にフルスタックなスキルはつきますが、それを目指しているわけではありません。
+基本的には、サービスに必要なことをただやる。それだけです。
 
-* Beyond the twelve factor app
+今回の講義の様に、はい！作ってください！ではなく、本当はそれ本当に必要？から考えていきます。ここらへんのマインドは後半開発でたっぷり堪能できますので、楽しみにしててください！
 
-こういうこと意識するんじゃよっていう話
+.link https://techlog.voyagegroup.com/entry/2019/02/04/171325 Netflixにおけるフルサイクル開発者―開発したものが運用する
+
+* おすすめの書籍
+
+聞かれそうだったので、先におすすめをしておくスタイル。
 
 .link https://tanzu.vmware.com/content/blog/beyond-the-twelve-factor-app Beyond the twelve factor app
+.link https://qiita.com/IshitaTakeshi/items/e4145921c8dbf7ba57ef The Zen of Python
+.link https://www.amazon.co.jp/%E3%82%A4%E3%82%B7%E3%83%A5%E3%83%BC%E3%81%8B%E3%82%89%E3%81%AF%E3%81%98%E3%82%81%E3%82%88%E2%80%95%E7%9F%A5%E7%9A%84%E7%94%9F%E7%94%A3%E3%81%AE%E3%80%8C%E3%82%B7%E3%83%B3%E3%83%97%E3%83%AB%E3%81%AA%E6%9C%AC%E8%B3%AA%E3%80%8D-%E5%AE%89%E5%AE%85%E5%92%8C%E4%BA%BA/dp/4862760856 イシューからはじめよ
+.link https://www.amazon.co.jp/Lean%E3%81%A8DevOps%E3%81%AE%E7%A7%91%E5%AD%A6%EF%BC%BBAccelerate%EF%BC%BD-%E3%83%86%E3%82%AF%E3%83%8E%E3%83%AD%E3%82%B8%E3%83%BC%E3%81%AE%E6%88%A6%E7%95%A5%E7%9A%84%E6%B4%BB%E7%94%A8%E3%81%8C%E7%B5%84%E7%B9%94%E5%A4%89%E9%9D%A9%E3%82%92%E5%8A%A0%E9%80%9F%E3%81%99%E3%82%8B-impress-top-gear%E3%82%B7%E3%83%AA%E3%83%BC%E3%82%BA-ebook/dp/B07L2R3LTN/ref=sr_1_1?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&crid=17Q48SNSXM4LO&dchild=1&keywords=lean%E3%81%A8devops%E3%81%AE%E7%A7%91%E5%AD%A6&qid=1624241000&s=books&sprefix=lean%E3%81%A8%2Cstripbooks%2C250&sr=1-1 LeanとDevOpsの科学
+.link https://www.amazon.co.jp/%E3%82%A8%E3%83%83%E3%82%BB%E3%83%B3%E3%82%B7%E3%83%A3%E3%83%AB%E6%80%9D%E8%80%83-%E6%9C%80%E5%B0%91%E3%81%AE%E6%99%82%E9%96%93%E3%81%A7%E6%88%90%E6%9E%9C%E3%82%92%E6%9C%80%E5%A4%A7%E3%81%AB%E3%81%99%E3%82%8B-%E3%82%B0%E3%83%AC%E3%83%83%E3%82%B0%E3%83%BB%E3%83%9E%E3%82%AD%E3%83%A5%E3%83%BC%E3%83%B3-ebook/dp/B00QQKCV6E/ref=sr_1_1?adgrpid=52892487083&dchild=1&gclid=CjwKCAjwzruGBhBAEiwAUqMR8P0bgLiK9fTZ9uFr6ycS8raA1kohLEg1dsR4U5oT638CMB9WvOvzyRoCS6cQAvD_BwE&hvadid=338579871296&hvdev=c&hvlocphy=1009307&hvnetw=g&hvqmt=e&hvrand=9901430831330722557&hvtargid=kwd-307897582519&hydadcr=17961_11158981&jp-ad-ap=0&keywords=%E3%82%A8%E3%83%83%E3%82%BB%E3%83%B3%E3%82%B7%E3%83%A3%E3%83%AB%E6%80%9D%E8%80%83&qid=1624241026&sr=8-1 エッセンシャル思考
