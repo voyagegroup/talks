@@ -1,0 +1,17 @@
+{
+  "name": "treasure-frontend",
+  "description": "講義資料",
+  "repository": "https://github.com/voyagegroup/talks",
+  "author": "yamachu",
+  "private": true,
+  "scripts": {
+    "watch": "marp -s"
+  },
+  "devDependencies": {
+    "@marp-team/marp-cli": "1.2.0"
+  },
+  "marp": {
+    "inputDir": "./slides",
+    "output": "./docs"
+  }
+}
