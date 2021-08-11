@@ -92,8 +92,6 @@ PR見ていく。
 
 クエリパラメータで検索文字列を受け取って、SQLでLIKEを使って検索しよう。
 
-.link https://pkg.go.dev/github.com/gorilla/mux#Vars mux.Vars
-
 * 課題の進め方
 
 * 作業ブランチを切ってPRを作る
