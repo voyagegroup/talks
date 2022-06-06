@@ -78,7 +78,12 @@ Goらしく書く
 
 .image ./img/arch.png 540 717
 
-* 構成
+* 各レイヤーの役割
+
+- interface: API利用者 (Client) とのやりとりをする
+- usecase: 利用者の目的を達成する
+- domain/model: サービスの中心となるオブジェクトを定義する場所
+- domain/repository: 永続化層とのやりとりをする
 
 * 適当なエンドポイントについて、コードを追ってみる
 
