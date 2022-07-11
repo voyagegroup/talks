@@ -115,6 +115,8 @@ OpenAPIというREST APIを記述するためのフォーマットでAPIを設�
 
 APIのドキュメンテーションに使える
 
+バックエンド側では、レスポンスに乗せるmodelの生成に使っている
+
 .link https://swagger.io/docs/specification/about/ What is OpenAPI?
 .link https://swagger.io/blog/api-strategy/difference-between-swagger-and-openapi/ difference between swagger and openapi
 
