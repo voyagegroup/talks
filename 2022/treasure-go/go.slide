@@ -90,6 +90,10 @@ Goらしく書く
 - interface/handler: HTTPリクエストを受け取り、レスポンスを返す
 - interface/middleware: handlerの前後にやりたい処理をする (認可とかロギングとか)
 
+* ざっくり処理の流れ
+
+.image ./img/sequence_diagram.png 540 780
+
 * 現状できること
 
 - 記事の一覧取得、特定の記事詳細の取得、記事の作成、更新、削除
@@ -105,30 +109,79 @@ Goらしく書く
 * APIファーストで開発する
 
 - swagger.ymlをいじる
+- DB側に変更が必要ならマイグレーションスクリプトを書く (マイグレーションについては後述)
 - 新たにエンドポイントが必要なら生やす
 - ロジックを書く
-- 完
 
 * Swagger 
 
 OpenAPIというREST APIを記述するためのフォーマットでAPIを設計する際に用いるツール
 
-APIのドキュメンテーションに使える
+OpenAPIという共通言語でAPIを定義することでフロント/バックのコミュニケーションがとりやすい
 
 バックエンド側では、レスポンスに乗せるmodelの生成に使っている
 
 .link https://swagger.io/docs/specification/about/ What is OpenAPI?
 .link https://swagger.io/blog/api-strategy/difference-between-swagger-and-openapi/ difference between swagger and openapi
 
+
+* DBのマイグレーション
+
+システムを運用していくと、DBへの変更というのは何度も起こる
+
+- テーブルの追加
+- カラムの追加
+- etc...
+
+適用したいDDLをスクリプトとして管理し、適用されてないものだけ実行する
+
+- DBがどの状態かわかる (=どのDDLまで適用されているか)
+- 本番・ステージングといった複数環境への変更適用が楽 (マイグレーション流せば終わり)
+
+* 今回使うマイグレーションツール
+
+.link https://flywaydb.org/ flyway
+
+`treasure-app-2022/database/migration/schema` にスクリプトがおいてある
+
+ファイルの命名規則
+.link https://flywaydb.org/documentation/concepts/migrations#versioned-migrations Versioned Migrations
+
+.image ./img/migration_naming_convention.png 300 600
+
+* DBに対して変更を加えたいとき
+
+1. 前述の命名規則で新しいスクリプトファイルを作る (versionが既存のものより最新になるようにする)
+2. *make* *flyway/migrate* で適用する
+3. *make* *flyway/info* でちゃんと適用されてるか確認する
+
+文法エラーなどでマイグレーションに失敗した場合
+
+- *make* *flyway/info* すると該当バージョンのステータスがfailedになる
+- 直したら *make* *flyway/repair* するとステータスがpending (適用前) に戻るので、再度マイグレーションする
+
+* マイグレーションで注意したいこと
+
+Undoはしない
+
+- いわゆる変更の巻き戻し
+- 例えば新たなカラムの追加を巻き戻すと、そのカラムのデータが消えることを意味する
+- 変更したけどもとに戻したいときは、それを打ち消すマイグレーションスクリプトを書こう
+
+アプリケーション側で問題が起きないかを意識する
+
+- カラムの削除とかはアプリケーション側で参照している箇所があると壊れる
+- 先にアプリケーション側で参照しないようにしてからDB側をいじるなど、安全にリリースすることを意識しよう
+
+
 * Let's Go
 
-* 課題1: 記事一覧を任意の項目でソートできるようにしたい
+* 課題1: 記事一覧を作成日時でソートできるようにしたい
 
 - `GET/articles` で作成された記事一覧が取得できる
-- SQLにORDER BY句を付け足して任意のカラムでソートできるようにする
-- クエリパラメータでどのカラムでソートするかを送る
-
-記事がどんな項目を持っているのか、DBを実際に見に行ってみる
+- 作成日時 (created_at) でORDER BYする
+- クエリパラメータで昇順か降順かを指定して遅れるようにする
+.link https://webtan.impress.co.jp/e/2012/04/26/12663#:~:text=%E3%80%8C%E3%82%AF%E3%82%A8%E3%83%AA%E3%83%91%E3%83%A9%E3%83%A1%E3%83%BC%E3%82%BF%E3%80%8D%E3%81%A8%E3%81%84%E3%81%86%E3%81%AE%E3%81%AF,%E6%AC%A1%E3%81%AE%E3%82%88%E3%81%86%E3%81%AB%E3%81%AA%E3%82%8B%E3%80%82&text=%E3%81%93%E3%81%AE%E5%A0%B4%E5%90%88%E3%80%81%E3%80%8C%3F,gaiq%E3%80%8D%E3%81%8C%E3%82%AF%E3%82%A8%E3%83%AA%E3%83%91%E3%83%A9%E3%83%A1%E3%83%BC%E3%82%BF%E3%81%A0%E3%80%82 クエリパラメータとは
 
 * 適当にブランチを切ってやってみよう
 
@@ -150,6 +203,15 @@ PRを作る、誰のどの課題かがわかるようなPR名にしてくれる�
 
 .link https://ikenox.info/blog/validation-in-clean-arch/ バリデーションはどこでやるべきか
 
+* ヒント (どこから手を付けていいかわからない人向け)
+
+- まずswagger.ymlの `GET/articles` の定義を見てみよう 
+- そこにクエリパラメータの定義を足してみる
+.link https://swagger.io/docs/specification/2-0/describing-parameters/ swagger パラメータの書き方
+- クエリパラメータはHTTP リクエストに乗ってくるものなので、handler層で処理しよう
+.link https://pkg.go.dev/net/url#URL.Query クエリパラメータのとり方
+- クエリパラメータから取得した値をhandler->usecase->repositoryと流して、SQL文にORDER BY句を足そう
+
 * PRを見ていく
 
 * 課題2: 記事についたコメント一覧を取ってこれるようにしたい
@@ -169,6 +231,12 @@ PRを作る、誰のどの課題かがわかるようなPR名にしてくれる�
 - HTTPメソッドは？
 - Request / Response Body どうする？
 - HTTP Status Code
+
+* ヒント (どこから手をつけていいかわからない人向け)
+
+- swagger.ymlにAPIの定義を足してみる (すでにある定義を参考にしてみよう)
+- server.goにエンドポイントを生やす
+- usecase, repository層に処理を書く
 
 * 課題3: 記事にタグを付けたい
 
@@ -194,7 +262,7 @@ GoでAPI書きました！！みたいな記事ならGo, WebAPIみたいなタ�
 
 * コラム: 良いAPIとは
 
-- どんなAPIが良い設計だと思います？
+- どんなAPIが良い設計だと思う？
 - ブレイクアウトルームに分かれて議論してみよう
 
 * 良いAPIとは (私の考え)
@@ -249,8 +317,6 @@ GraphQLはクエリ言語とクエリを実行するサーバーサイドエン�
 
 GraphQLとRESTは全く別物 (片方が一方の上位互換というわけではない)
 
-ベースアプリでもGraphQLのクエリがかけるようにしているので、興味あればLet's チャレンジ！
-
 
 * 課題4: 他のユーザーをフォローできるようにしたい
 
@@ -280,9 +346,15 @@ GraphQLとRESTは全く別物 (片方が一方の上位互換というわけで�
 
 - フロントが得意だからといってフロントだけをやるのではもったいない
 - 自分が作りたい機能の実現に必要なことは全部やってみてほしい
-- コンフォートゾーンの外側へとびだせ！！
 
-.link https://www.redbull.com/jp-ja/escape-comfort-zone コンフォートゾーンから抜け出す方法
+* コンフォートゾーンのちょっと外側に行く
+
+- 今の自分にとって苦手なこと、できないことにチャレンジする
+- 成長してコンフォートゾーンが広がると、別の課題が見えてきてチャレンジできる幅が広がる
+
+.image ./img/comfort_zone.png 350 550
+
+.link http://slope.valuesv.jp/2020/07/01/%E6%88%90%E9%95%B7%E3%81%99%E3%82%8B%E3%81%AB%E3%81%AF%E3%80%8C%E3%82%B3%E3%83%B3%E3%83%95%E3%82%A9%E3%83%BC%E3%83%88%E3%82%BE%E3%83%BC%E3%83%B3%E3%80%8D%E3%82%92%E5%87%BA%E3%82%88/ [出典]成長するには「コンフォートゾーン」を出よ
 
 * チーム開発で意識してほしいこと
 
