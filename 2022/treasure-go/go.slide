@@ -90,6 +90,32 @@ Goらしく書く
 - interface/handler: HTTPリクエストを受け取り、レスポンスを返す
 - interface/middleware: handlerの前後にやりたい処理をする (認可とかロギングとか)
 
+* 関心事の分離
+
+今回のアーキテクチャにおける、各レイヤーの関心事はざっくり以下の通り
+
+- handler層: HTTP リクエスト / レスポンス
+- usecase層: ビジネスロジック
+- repository層: 永続化層 (DB) とのやりとり
+
+各レイヤーが複数の関心事を持たないようにする
+
+.link https://www.ogis-ri.co.jp/otc/hiroba/others/OOcolumn/single-responsibility-principle.html 単一責任の原則
+
+- 変更しやすくなる
+- 認知負荷を下げる
+- テストしやすくなる
+
+* 関心事を分けなくて4ぬ例: ファットコントローラー
+
+コントローラー (今回でいうhandler的なレイヤー)にあらゆる関心事を書く
+
+.code fat_controller.go
+
+- 認知負荷の増大
+- 様々な理由ですぐ壊れる
+
+
 * ざっくり処理の流れ
 
 .image ./img/sequence_diagram.png 540 780
